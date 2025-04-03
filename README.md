@@ -9,6 +9,32 @@ A Kubernetes MCP (Model Control Protocol) server that enables interaction with K
 - Configurable write operations (create/update/delete can be enabled/disabled independently)
 - Connects to Kubernetes cluster using kubeconfig
 
+## Use Cases
+
+### 1. Kubernetes Resource Management via LLM
+
+- **Interactive Resource Management**: Manage Kubernetes resources through natural language interaction with LLM, eliminating the need to memorize complex kubectl commands
+- **Batch Operations**: Describe complex batch operation requirements in natural language, letting LLM translate them into specific resource operations
+- **Resource Status Queries**: Query cluster resource status using natural language and receive easy-to-understand responses
+
+### 2. Automated Operations Scenarios
+
+- **Intelligent Operations Assistant**: Serve as an intelligent assistant for operators in daily cluster management tasks
+- **Problem Diagnosis**: Assist in cluster problem diagnosis through natural language problem descriptions
+- **Configuration Review**: Leverage LLM's understanding capabilities to help review and optimize Kubernetes resource configurations
+
+### 3. Development and Testing Support
+
+- **Quick Prototype Validation**: Developers can quickly create and validate resource configurations through natural language
+- **Environment Management**: Simplify test environment resource management, quickly create, modify, and clean up test resources
+- **Configuration Generation**: Automatically generate resource configurations that follow best practices based on requirement descriptions
+
+### 4. Education and Training Scenarios
+
+- **Interactive Learning**: Newcomers can learn Kubernetes concepts and operations through natural language interaction
+- **Best Practice Guidance**: LLM provides best practice suggestions during resource operations
+- **Error Explanation**: Provide easy-to-understand error explanations and correction suggestions when operations fail
+
 ## Architecture
 
 ### 1. Project Overview
