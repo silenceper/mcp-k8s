@@ -32,8 +32,18 @@ build-darwin-amd64: init
 build-darwin-arm64: init
 	GOOS=darwin GOARCH=arm64 go build -o $(BUILDDIR)/$(APPNAME)_darwin_arm64  cmd/server/main.go
 
+# Cross-platform build - Linux
+.PHONY: build-linux-amd64
+build-linux-amd64: init
+	GOOS=linux GOARCH=amd64 go build -o $(BUILDDIR)/$(APPNAME)_linux_amd64  cmd/server/main.go
+
+# Cross-platform build - Linux
+.PHONY: build-linux-arm64
+build-linux-arm64: init
+	GOOS=linux GOARCH=arm64 go build -o $(BUILDDIR)/$(APPNAME)_linux_arm64  cmd/server/main.go
+
 # Cross-platform build - All platforms
 .PHONY: build-all
-build-all: build-windows-amd64 build-darwin-amd64 build-darwin-arm64
+build-all: build-windows-amd64 build-darwin-amd64 build-darwin-arm64 build-linux-amd64 build-linux-arm64
 	@echo "All platforms built successfully"
 	@ls -la $(BUILDDIR)
