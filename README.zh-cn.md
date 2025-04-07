@@ -2,6 +2,7 @@
 
 一个基于 MCP（Model Control Protocol）的 Kubernetes 服务器，通过 MCP 工具实现与 Kubernetes 集群的交互。
 
+
 ## 功能特性
 
 - 查询支持的 Kubernetes 资源类型（内置资源和 CRD）
@@ -9,6 +10,10 @@
 - 可配置的写操作（创建/更新/删除可独立启用/禁用）
 - 使用 kubeconfig 连接 Kubernetes 集群
 
+## 预览
+> 这里通过cursor进行交互使用
+
+![](./docs/create-deployment.png)
 ## 使用场景
 
 ### 1. 基于 LLM 的 Kubernetes 资源管理
@@ -70,6 +75,9 @@
 
 ## 快速开始
 
+### 直接使用
+从 [releases页面](https://github.com/seekrays/mcp-monitor/releases) 直接下载对应平台的二进制可以直接使用；
+
 ### 构建
 
 ```bash
@@ -106,3 +114,6 @@ mcp-k8s 是一个基于标准输入输出的 MCP 服务器，可以与任何兼�
 - 通过独立的配置开关严格控制写操作
 - 使用 RBAC 确保 K8s 客户端只具有必要的权限
 - 验证所有用户输入以防止注入攻击 
+
+## 公众号关注
+![AI技术小林](./docs/qrcode.png)

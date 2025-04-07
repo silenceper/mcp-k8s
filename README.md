@@ -9,6 +9,11 @@ A Kubernetes MCP (Model Control Protocol) server that enables interaction with K
 - Configurable write operations (create/update/delete can be enabled/disabled independently)
 - Connects to Kubernetes cluster using kubeconfig
 
+## Preview
+> Interaction through cursor
+
+![](./docs/create-deployment.png)
+
 ## Use Cases
 
 ### 1. Kubernetes Resource Management via LLM
@@ -70,6 +75,9 @@ An stdio-based MCP server that connects to Kubernetes clusters and provides the 
 
 ## Getting Started
 
+### Direct Usage
+You can directly download the binary for your platform from the [releases page](https://github.com/seekrays/mcp-monitor/releases) and use it immediately.
+
 ### Build
 
 ```bash
@@ -106,3 +114,6 @@ mcp-k8s is an stdio-based MCP server that can be integrated with any MCP-compati
 - Write operations are strictly controlled through independent configuration switches
 - Uses RBAC to ensure K8s client has only necessary permissions
 - Validates all user inputs to prevent injection attacks
+
+## Follow WeChat Official Account
+![AI技术小林](./docs/qrcode.png)
