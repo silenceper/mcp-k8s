@@ -76,7 +76,7 @@ An stdio-based MCP server that connects to Kubernetes clusters and provides the 
 ## Getting Started
 
 ### Direct Usage
-You can directly download the binary for your platform from the [releases page](https://github.com/seekrays/mcp-monitor/releases) and use it immediately.
+You can directly download the binary for your platform from the [releases page](https://github.com/silenceper/mcp-k8s/releases) and use it immediately.
 
 ### Build
 
