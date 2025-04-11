@@ -288,4 +288,4 @@ func HandleDeleteResource(client *k8s.Client) func(ctx context.Context, request 
 
 		return mcp.NewToolResultText(fmt.Sprintf("Successfully deleted resource %s/%s", kind, name)), nil
 	}
-} 
+}

@@ -10,8 +10,14 @@ build:
 	go build -o ./bin/mcp-k8s cmd/server/main.go
 
 # Clean the project
+.PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)
+
+# Format the code
+.PHONY: fmt
+fmt:
+	go fmt ./...
 
 # Create output directory
 .PHONY: init
