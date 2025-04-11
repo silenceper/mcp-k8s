@@ -15,15 +15,18 @@ type Config struct {
 	EnableUpdate bool
 	// 是否启用资源删除操作
 	EnableDelete bool
+	// 是否启用资源列表操作
+	EnableList bool
 }
 
 // NewConfig 从命令行参数创建配置
-func NewConfig(kubeconfigPath string, enableCreate, enableUpdate, enableDelete bool) *Config {
+func NewConfig(kubeconfigPath string, enableCreate, enableUpdate, enableDelete, enableList bool) *Config {
 	return &Config{
 		KubeconfigPath: kubeconfigPath,
 		EnableCreate:   enableCreate,
 		EnableUpdate:   enableUpdate,
 		EnableDelete:   enableDelete,
+		EnableList:     enableList,
 	}
 }
 
@@ -37,4 +40,4 @@ func (c *Config) Validate() error {
 		}
 	}
 	return nil
-} 
+}

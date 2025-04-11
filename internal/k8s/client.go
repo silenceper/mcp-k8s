@@ -300,4 +300,4 @@ func (c *Client) findGroupVersionResource(kind string) (*schema.GroupVersionReso
 	}
 
 	return nil, fmt.Errorf("找不到资源类型 %s", kind)
-} 
+}

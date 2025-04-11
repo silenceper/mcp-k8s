@@ -73,6 +73,64 @@ An stdio-based MCP server that connects to Kubernetes clusters and provides the 
 - `update_resource`: Update existing resources (can be disabled)
 - `delete_resource`: Delete resources (can be disabled)
 
+## Usage
+
+mcp-k8s supports two communication modes:
+
+### 1. Stdio Mode (Default)
+
+In stdio mode, mcp-k8s communicates with the client through standard input/output streams. This is the default mode and is suitable for most use cases.
+
+```bash
+# Run in stdio mode (default)
+{
+    "mcpServers":
+    {
+        "mcp-k8s":
+        {
+            "command": "/path/to/mcp-k8s",
+            "args":
+            [
+                "-kubeconfig",
+                "/path/to/kubeconfig",
+                "-enable-create",
+                "-enable-delete",
+                "-enable-update",
+                "-enable-list"
+            ]
+        }
+    }
+}
+```
+
+### 2. SSE Mode
+
+In SSE (Server-Sent Events) mode, mcp-k8s exposes an HTTP endpoint to mcp client.
+You can deploy the service on a remote server (but you need to pay attention to security)
+
+```bash
+# Run in SSE mode
+./bin/mcp-k8s -kubeconfig=/path/to/kubeconfig -transport=sse -port=8080 -host=localhost -enable-create -enable-delete -enable-list -enable-update
+# This command will open all operations
+```
+
+mcp config
+```json
+{
+  "mcpServers": {
+    "mcp-k8s": {
+      "url": "http://localhost:8080/sse",
+      "args": []
+    }
+  }
+}
+```
+
+SSE mode configuration:
+- `-transport`: Set to "sse" to enable SSE mode
+- `-port`: HTTP server port (default: 8080)
+- `--host`: HTTP server host (default: "localhost")
+
 ## Getting Started
 
 ### Direct Usage
@@ -86,24 +144,16 @@ cd mcp-k8s
 go build -o bin/mcp-k8s cmd/server/main.go
 ```
 
-### Run
-
-Default mode (read-only operations):
-```bash
-./bin/mcp-k8s --kubeconfig=/path/to/kubeconfig
-```
-
-Enable write operations:
-```bash
-./bin/mcp-k8s --kubeconfig=/path/to/kubeconfig --enable-create --enable-update --enable-delete
-```
-
 ### Command Line Arguments
 
-- `--kubeconfig`: Path to Kubernetes configuration file (uses default config if not specified)
-- `--enable-create`: Enable resource creation operations (default: false)
-- `--enable-update`: Enable resource update operations (default: false)
-- `--enable-delete`: Enable resource deletion operations (default: false)
+- `-kubeconfig`: Path to Kubernetes configuration file (uses default config if not specified)
+- `-enable-create`: Enable resource creation operations (default: false)
+- `-enable-update`: Enable resource update operations (default: false)
+- `-enable-delete`: Enable resource deletion operations (default: false)
+- `-enable-list`: Enable resource list operations (default: true)
+- `-transport`: Transport type (stdio or sse) (default: "stdio")
+- `-host`: Host for SSE transport (default "localhost")
+- `-port`: TCP port for SSE transport (default 8080)
 
 ### Integration with MCP Clients
 
