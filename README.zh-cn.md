@@ -76,7 +76,7 @@
 ## 快速开始
 
 ### 直接使用
-从 [releases页面](https://github.com/seekrays/mcp-monitor/releases) 直接下载对应平台的二进制可以直接使用；
+从 [releases页面](https://github.com/silenceper/mcp-k8s/releases) 直接下载对应平台的二进制可以直接使用；
 
 ### 构建
 
