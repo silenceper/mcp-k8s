@@ -75,7 +75,7 @@ func CreateCreateResourceTool() mcp.Tool {
 		),
 		mcp.WithString("manifest",
 			mcp.Required(),
-			mcp.Description("Resource manifest (JSON/YAML)"),
+			mcp.Description("Resource manifest (Only JSON is supported)"),
 		),
 	)
 }
@@ -97,7 +97,7 @@ func CreateUpdateResourceTool() mcp.Tool {
 		),
 		mcp.WithString("manifest",
 			mcp.Required(),
-			mcp.Description("Resource manifest (JSON/YAML)"),
+			mcp.Description("Resource manifest (Only JSON is supported)"),
 		),
 	)
 }
