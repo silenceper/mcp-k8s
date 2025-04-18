@@ -131,6 +131,44 @@ SSE 模式配置：
 - `-port`：HTTP 服务器端口（默认：8080）
 - `-host`：HTTP 服务器主机（默认："localhost"）
 
+### 2. 使用 Docker
+
+您可以像这样使用docker环境运行
+
+```bash
+docker build -t mcp-k8s:latest .  
+docker run --rm  -i -v   ~/.kube/config:/root/.kube/config  mcp-k8s:latest  args
+```
+对于 docker 的 mcp 配置
+```json
+{
+  "mcpServers": {
+    "mcp-k8s": {
+      "url": "http://you ip:8080/sse",
+      "args": []
+    }
+  }
+}
+```
+对于 docker 在 stdio 模式下
+```json
+{
+  "mcpServers": {
+    "mmcp-k8s": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "-v",
+        "~/.kube/config:/root/.kube/config",
+        "--rm",
+        "mcp-k8s:latest"
+      ]
+    }
+  }
+}
+```
+
 ## 快速开始
 
 ### 直接使用
