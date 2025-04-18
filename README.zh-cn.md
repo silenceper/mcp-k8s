@@ -131,7 +131,7 @@ SSE 模式配置：
 - `-port`：HTTP 服务器端口（默认：8080）
 - `-host`：HTTP 服务器主机（默认："localhost"）
 
-### 2. 使用 Docker
+### 3. 使用 Docker
 
 您可以像这样使用docker环境运行
 
