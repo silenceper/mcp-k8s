@@ -134,15 +134,8 @@ SSE 模式配置：
 ### 3. Docker 环境 
 
 #### SSE 模式配置
-1. 自定义版本和平台构建：
-```bash
-docker build \
-  --build-arg VERSION=v1.0.2 \
-  --build-arg PLATFORM=linux_amd64 \
-  -t mcp-k8s .
-```
 
-2. 完整示例
+1. 完整示例
 假设你的镜像名为 mcp-k8s，并且需要映射端口和设置环境参数，可以运行：
 ```bash
 docker run --rm -p 8080:8080 -i -v   ~/.kube/config:/root/.kube/config   mcp-k8s   -transport=sse
