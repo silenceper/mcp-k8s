@@ -1,4 +1,4 @@
-FROM alpine:latest as builder
+FROM alpine:latest
 LABEL maintainer="wang.t <wang.t.nice@gmail.com>,silenceper"
 
 ARG VERSION=v1.0.2
@@ -7,4 +7,5 @@ ARG MCP_K8S_URL=https://github.com/silenceper/mcp-k8s/releases/download/${VERSIO
 
 RUN wget -cO mcp-k8s $MCP_K8S_URL && \
     chmod  +x mcp-k8s
+    
 ENTRYPOINT ["./mcp-k8s"]
