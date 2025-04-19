@@ -133,14 +133,8 @@ SSE mode configuration:
 
 ### 3. Docker environment
 #### SSE Mode
-  1. Custom version and platform construction：
-```bash
-docker build \
-  --build-arg VERSION=v1.0.2 \
-  --build-arg PLATFORM=linux_amd64 \
-  -t mcp-k8s .
-```
-2. Complete Example
+
+1. Complete Example
 Assuming your image name is mcp-k8s and you need to map ports and set environment parameters, you can run:
 ```bash
 docker run --rm -p 8080:8080 -i -v   ~/.kube/config:/root/.kube/config   mcp-k8s   -transport=sse
