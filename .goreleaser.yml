@@ -59,7 +59,7 @@ dockers:
     skip_push: false
   - image_templates:
       - "ghcr.io/silenceper/{{ .ProjectName }}:{{ .Version }}-arm64"
-    dockerfile: Dockerfile.goreleaser
+    dockerfile: Dockerfile
     use: buildx
     build_flag_templates:
       - "--platform=linux/arm64"
