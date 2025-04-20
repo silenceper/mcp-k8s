@@ -19,6 +19,7 @@ func main() {
 	enableUpdate := flag.Bool("enable-update", false, "Enable resource update operations")
 	enableDelete := flag.Bool("enable-delete", false, "Enable resource deletion operations")
 	enableList := flag.Bool("enable-list", true, "Enable resource list operations")
+	enableHelm := flag.Bool("enable-helm", false, "Enable Helm operations")
 	transport := flag.String("transport", "stdio", "Transport type (stdio or sse)")
 	host := flag.String("host", "localhost", "Host for SSE transport")
 	port := flag.Int("port", 8080, "TCP port for SSE transport")
@@ -26,6 +27,7 @@ func main() {
 
 	// Create configuration
 	cfg := config.NewConfig(*kubeconfigPath, *enableCreate, *enableUpdate, *enableDelete, *enableList)
+	cfg.EnableHelm = *enableHelm
 	if err := cfg.Validate(); err != nil {
 		fmt.Fprintf(os.Stderr, "Configuration validation failed: %v\n", err)
 		os.Exit(1)
@@ -67,6 +69,23 @@ func main() {
 		fmt.Println("Registering resource deletion tool...")
 		s.AddTool(tools.CreateDeleteResourceTool(), tools.HandleDeleteResource(client))
 	}
+	
+	// Add Helm tools (if enabled)
+	if cfg.EnableHelm {
+		fmt.Println("Registering Helm tools...")
+		
+		// Helm Release 管理
+		s.AddTool(tools.CreateListHelmReleasesTool(), tools.HandleListHelmReleases(client))
+		s.AddTool(tools.CreateGetHelmReleaseTool(), tools.HandleGetHelmRelease(client))
+		s.AddTool(tools.CreateInstallHelmChartTool(), tools.HandleInstallHelmChart(client))
+		s.AddTool(tools.CreateUpgradeHelmChartTool(), tools.HandleUpgradeHelmChart(client))
+		s.AddTool(tools.CreateUninstallHelmChartTool(), tools.HandleUninstallHelmChart(client))
+		
+		// Helm 仓库管理
+		s.AddTool(tools.CreateListHelmRepositoriesTool(), tools.HandleListHelmRepositories(client))
+		s.AddTool(tools.CreateAddHelmRepositoryTool(), tools.HandleAddHelmRepository(client))
+		s.AddTool(tools.CreateRemoveHelmRepositoryTool(), tools.HandleRemoveHelmRepository(client))
+	}
 
 	// Output functionality status
 	fmt.Printf("\nStarting Kubernetes MCP Server with %s transport on %s:%d\n", *transport, *host, *port)
@@ -74,6 +93,7 @@ func main() {
 	fmt.Printf("Update operations: %v\n", cfg.EnableUpdate)
 	fmt.Printf("Delete operations: %v\n", cfg.EnableDelete)
 	fmt.Printf("List operations: %v\n", cfg.EnableList)
+	fmt.Printf("Helm operations: %v\n", cfg.EnableHelm)
 
 	// Start stdio server
 	fmt.Println("\nServer started, waiting for MCP client connections...\n")

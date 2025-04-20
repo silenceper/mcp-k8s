@@ -27,6 +27,8 @@ type Client struct {
 	discoveryClient *discovery.DiscoveryClient
 	// REST 配置
 	restConfig *rest.Config
+	// kubeconfig 路径
+	kubeconfigPath string
 }
 
 // NewClient 创建一个新的 Kubernetes 客户端
@@ -76,6 +78,7 @@ func NewClient(kubeconfigPath string) (*Client, error) {
 		dynamicClient:   dynamicClient,
 		discoveryClient: discoveryClient,
 		restConfig:      config,
+		kubeconfigPath:  kubeconfig,
 	}, nil
 }
 
@@ -300,4 +303,9 @@ func (c *Client) findGroupVersionResource(kind string) (*schema.GroupVersionReso
 	}
 
 	return nil, fmt.Errorf("找不到资源类型 %s", kind)
+}
+
+// GetKubeconfigPath 返回客户端使用的 kubeconfig 路径
+func (c *Client) GetKubeconfigPath() string {
+	return c.kubeconfigPath
 }

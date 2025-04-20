@@ -17,6 +17,8 @@ type Config struct {
 	EnableDelete bool
 	// 是否启用资源列表操作
 	EnableList bool
+	// 是否启用 Helm 操作
+	EnableHelm bool
 }
 
 // NewConfig 从命令行参数创建配置
