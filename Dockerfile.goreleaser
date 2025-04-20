@@ -1,0 +1,6 @@
+FROM alpine:3.18.4
+
+WORKDIR /root
+RUN apk add --no-cache gcompat
+COPY mcp-k8s /usr/local/bin/mcp-k8s
+ENTRYPOINT ["/usr/local/bin/mcp-k8s"] 

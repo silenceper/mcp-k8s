@@ -6,7 +6,10 @@ ARG LDFLAGS=""
 FROM golang:${GOVERSION} as builder
 # Copy in the go src
 WORKDIR /go/src/github.com/silenceper/mcp-k8s
-COPY . .
+COPY internal internal/
+COPY cmd cmd/
+COPY go.mod go.mod
+COPY go.sum go.sum
 ARG LDFLAGS
 ARG TARGETOS
 ARG TARGETARCH
