@@ -137,7 +137,7 @@ SSE mode configuration:
 1. Complete Example
 Assuming your image name is mcp-k8s and you need to map ports and set environment parameters, you can run:
 ```bash
-docker run --rm -p 8080:8080 -i -v   ~/.kube/config:/root/.kube/config   mcp-k8s   -transport=sse
+docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/silenceper/mcp-k8s:latest -transport=sse
 ```
 #### stdio Mode
 
@@ -152,7 +152,7 @@ docker run --rm -p 8080:8080 -i -v   ~/.kube/config:/root/.kube/config   mcp-k8s
         "-v",
         "~/.kube/config:/root/.kube/config",
         "--rm",
-        "mcp-k8s"
+        "ghcr.io/silenceper/mcp-k8s:latest"
       ]
     }
   }
