@@ -159,7 +159,7 @@ func main() {
 	fmt.Printf("  Helm repository remove: %v\n", cfg.EnableHelmRepoRemove)
 
 	// Start stdio server
-	fmt.Println("\nServer started, waiting for MCP client connections...\n")
+	fmt.Println("\nServer started, waiting for MCP client connections...")
 	if *transport == "stdio" {
 		if err := server.ServeStdio(s); err != nil {
 			fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
