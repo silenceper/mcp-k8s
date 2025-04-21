@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/github/license/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/blob/main/LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/silenceper/mcp-k8s)](https://goreportcard.com/report/github.com/silenceper/mcp-k8s)
+[![Go CI](https://github.com/silenceper/mcp-k8s/actions/workflows/go-ci.yml/badge.svg)](https://github.com/silenceper/mcp-k8s/actions/workflows/go-ci.yml)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/silenceper/mcp-k8s/pulls)
 
 一个基于 MCP（Model Control Protocol）的 Kubernetes 服务器，支持通过 MCP 工具与 Kubernetes 集群进行交互。
