@@ -169,7 +169,8 @@ func (c *HelmClient) InstallChart(name, chartName string, values map[string]inte
 	}
 	
 	// 定位 chart
-	cp, err := client.ChartPathOptions.LocateChart(chartPath, c.settings)
+	chartPathOptions := client.ChartPathOptions
+	cp, err := chartPathOptions.LocateChart(chartPath, c.settings)
 	if err != nil {
 		return nil, fmt.Errorf("查找 chart '%s' 失败: %w", chartPath, err)
 	}
@@ -219,7 +220,8 @@ func (c *HelmClient) UpgradeChart(name, chartName string, values map[string]inte
 	}
 	
 	// 定位 chart
-	cp, err := client.ChartPathOptions.LocateChart(chartPath, c.settings)
+	chartPathOptions := client.ChartPathOptions
+	cp, err := chartPathOptions.LocateChart(chartPath, c.settings)
 	if err != nil {
 		return nil, fmt.Errorf("查找 chart '%s' 失败: %w", chartPath, err)
 	}
@@ -412,7 +414,8 @@ func ParseYamlValues(valuesYaml string) (map[string]interface{}, error) {
 // GetChartInfo 获取 chart 的详细信息
 func (c *HelmClient) GetChartInfo(name string, version string, repo string) (*chart.Metadata, error) {
 	client := action.NewShowWithConfig(action.ShowChart, c.config)
-	client.ChartPathOptions.Version = version
+	chartPathOptions := client.ChartPathOptions
+	chartPathOptions.Version = version
 	
 	// 解析 chart 名称和仓库
 	var chartPath string
@@ -425,7 +428,7 @@ func (c *HelmClient) GetChartInfo(name string, version string, repo string) (*ch
 	}
 	
 	// 定位 chart
-	cp, err := client.ChartPathOptions.LocateChart(chartPath, c.settings)
+	cp, err := chartPathOptions.LocateChart(chartPath, c.settings)
 	if err != nil {
 		return nil, fmt.Errorf("查找 chart '%s' 失败: %w", chartPath, err)
 	}

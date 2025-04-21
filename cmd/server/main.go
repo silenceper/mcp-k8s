@@ -160,12 +160,13 @@ func main() {
 
 	// Start stdio server
 	fmt.Println("\nServer started, waiting for MCP client connections...")
-	if *transport == "stdio" {
+	switch *transport {
+	case "stdio":
 		if err := server.ServeStdio(s); err != nil {
 			fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
 			os.Exit(1)
 		}
-	} else if *transport == "sse" {
+	case "sse":
 		sseUrl := fmt.Sprintf("http://%s:%d", *host, *port)
 		sseServer := server.NewSSEServer(s, server.WithBaseURL(sseUrl))
 		if err := sseServer.Start(fmt.Sprintf(":%d", *port)); err != nil {

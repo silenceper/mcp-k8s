@@ -30,9 +30,6 @@ jobs:
           version: latest
           args: --timeout=5m
 
-      - name: Run golangci-lint
-        run: golangci-lint run --out-format=colored-line-number --timeout 5m
-
       - name: Run tests
         run: go test -v -race -timeout 10m ./...
 
