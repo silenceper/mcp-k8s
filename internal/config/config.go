@@ -17,8 +17,22 @@ type Config struct {
 	EnableDelete bool
 	// 是否启用资源列表操作
 	EnableList bool
-	// 是否启用 Helm 操作
-	EnableHelm bool
+	// 是否启用 Helm 安装操作
+	EnableHelmInstall bool
+	// 是否启用 Helm 升级操作
+	EnableHelmUpgrade bool
+	// 是否启用 Helm 卸载操作
+	EnableHelmUninstall bool
+	// 是否启用 Helm 仓库添加操作
+	EnableHelmRepoAdd bool
+	// 是否启用 Helm 仓库删除操作
+	EnableHelmRepoRemove bool
+	// 是否启用 Helm 发布版列表操作
+	EnableHelmReleaseList bool
+	// 是否启用 Helm 发布版查询操作
+	EnableHelmReleaseGet bool
+	// 是否启用 Helm 仓库列表操作
+	EnableHelmRepoList bool
 }
 
 // NewConfig 从命令行参数创建配置
@@ -42,4 +56,19 @@ func (c *Config) Validate() error {
 		}
 	}
 	return nil
+}
+
+// InitHelmDefaults 初始化Helm相关的默认配置
+func (c *Config) InitHelmDefaults() {
+	// 读操作默认开启
+	c.EnableHelmReleaseList = true
+	c.EnableHelmReleaseGet = true
+	c.EnableHelmRepoList = true
+	
+	// 写操作默认关闭
+	c.EnableHelmInstall = false
+	c.EnableHelmUpgrade = false
+	c.EnableHelmUninstall = false
+	c.EnableHelmRepoAdd = false
+	c.EnableHelmRepoRemove = false
 }
