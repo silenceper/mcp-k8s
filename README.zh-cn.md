@@ -1,6 +1,5 @@
 # mcp-k8s
 
-[![GitHub stars](https://img.shields.io/github/stars/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/stargazers)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/blob/main/go.mod)
 [![License](https://img.shields.io/github/license/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/blob/main/LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/releases)
