@@ -1,13 +1,26 @@
 # mcp-k8s
 
+[![Go Version](https://img.shields.io/github/go-mod/go-version/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/blob/main/go.mod)
+[![License](https://img.shields.io/github/license/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/blob/main/LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/silenceper/mcp-k8s)](https://github.com/silenceper/mcp-k8s/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/silenceper/mcp-k8s)](https://goreportcard.com/report/github.com/silenceper/mcp-k8s)
+[![Go CI](https://github.com/silenceper/mcp-k8s/actions/workflows/go-ci.yml/badge.svg)](https://github.com/silenceper/mcp-k8s/actions/workflows/go-ci.yml)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/silenceper/mcp-k8s/pulls)
+
 A Kubernetes MCP (Model Control Protocol) server that enables interaction with Kubernetes clusters through MCP tools.
 
 ## Features
 
 - Query supported Kubernetes resource types (built-in resources and CRDs)
-- Perform CRUD operations on Kubernetes resources
-- Configurable write operations (create/update/delete can be enabled/disabled independently)
+- Kubernetes resource operations with fine-grained control
+  - Read operations: get resource details, list resources by type with filtering options
+  - Write operations: create, update, and delete resources (each can be independently enabled/disabled)
+  - Support for all Kubernetes resource types, including custom resources
 - Connects to Kubernetes cluster using kubeconfig
+- Helm support with fine-grained control
+  - Helm releases management (list, get, install, upgrade, uninstall)
+  - Helm repositories management (list, add, remove)
+  - Each operation can be independently enabled/disabled
 
 ## Preview
 > Interaction through cursor
@@ -47,19 +60,22 @@ A Kubernetes MCP (Model Control Protocol) server that enables interaction with K
 An stdio-based MCP server that connects to Kubernetes clusters and provides the following capabilities:
 - Query Kubernetes resource types (including built-in resources and CRDs)
 - CRUD operations on Kubernetes resources (with configurable write operations)
+- Helm operations for release and repository management
 
 ### 2. Technical Stack
 
 - Go
 - [mcp-go](https://github.com/mark3labs/mcp-go) SDK
 - Kubernetes client-go library
+- Helm v3 client library
 - Stdio for communication
 
 ### 3. Core Components
 
 1. **MCP Server**: Uses mcp-go's `server` package to create an stdio-based MCP server
 2. **K8s Client**: Uses client-go to connect to Kubernetes clusters
-3. **Tool Implementations**: Implements various MCP tools for different Kubernetes operations
+3. **Helm Client**: Uses Helm v3 library for Helm operations
+4. **Tool Implementations**: Implements various MCP tools for different Kubernetes operations
 
 ### 4. Available Tools
 
@@ -72,6 +88,16 @@ An stdio-based MCP server that connects to Kubernetes clusters and provides the 
 - `create_resource`: Create new resources (can be disabled)
 - `update_resource`: Update existing resources (can be disabled)
 - `delete_resource`: Delete resources (can be disabled)
+
+#### Helm Operation Tools
+- `list_helm_releases`: List all Helm releases in the cluster
+- `get_helm_release`: Get detailed information about a specific Helm release
+- `install_helm_chart`: Install a Helm chart (can be disabled)
+- `upgrade_helm_chart`: Upgrade a Helm release (can be disabled)
+- `uninstall_helm_chart`: Uninstall a Helm release (can be disabled)
+- `list_helm_repositories`: List configured Helm repositories
+- `add_helm_repository`: Add a new Helm repository (can be disabled)
+- `remove_helm_repository`: Remove a Helm repository (can be disabled)
 
 ## Usage
 
@@ -96,7 +122,9 @@ In stdio mode, mcp-k8s communicates with the client through standard input/outpu
                 "-enable-create",
                 "-enable-delete",
                 "-enable-update",
-                "-enable-list"
+                "-enable-list",
+                "-enable-helm-install",
+                "-enable-helm-upgrade"
             ]
         }
     }
@@ -110,7 +138,7 @@ You can deploy the service on a remote server (but you need to pay attention to 
 
 ```bash
 # Run in SSE mode
-./bin/mcp-k8s -kubeconfig=/path/to/kubeconfig -transport=sse -port=8080 -host=localhost -enable-create -enable-delete -enable-list -enable-update
+./bin/mcp-k8s -kubeconfig=/path/to/kubeconfig -transport=sse -port=8080 -host=localhost -enable-create -enable-delete -enable-list -enable-update -enable-helm-install
 # This command will open all operations
 ```
 
@@ -175,11 +203,24 @@ go build -o bin/mcp-k8s cmd/server/main.go
 
 ### Command Line Arguments
 
+#### Kubernetes Resource Operations
 - `-kubeconfig`: Path to Kubernetes configuration file (uses default config if not specified)
 - `-enable-create`: Enable resource creation operations (default: false)
 - `-enable-update`: Enable resource update operations (default: false)
 - `-enable-delete`: Enable resource deletion operations (default: false)
 - `-enable-list`: Enable resource list operations (default: true)
+
+#### Helm Operations
+- `-enable-helm-release-list`: Enable Helm release list operations (default: true)
+- `-enable-helm-release-get`: Enable Helm release get operations (default: true)
+- `-enable-helm-install`: Enable Helm chart installation (default: false)
+- `-enable-helm-upgrade`: Enable Helm chart upgrade (default: false)
+- `-enable-helm-uninstall`: Enable Helm chart uninstallation (default: false)
+- `-enable-helm-repo-list`: Enable Helm repository list operations (default: true)
+- `-enable-helm-repo-add`: Enable Helm repository add operations (default: false)
+- `-enable-helm-repo-remove`: Enable Helm repository remove operations (default: false)
+
+#### Transport Configuration
 - `-transport`: Transport type (stdio or sse) (default: "stdio")
 - `-host`: Host for SSE transport (default "localhost")
 - `-port`: TCP port for SSE transport (default 8080)
@@ -193,6 +234,7 @@ mcp-k8s is an stdio-based MCP server that can be integrated with any MCP-compati
 - Write operations are strictly controlled through independent configuration switches
 - Uses RBAC to ensure K8s client has only necessary permissions
 - Validates all user inputs to prevent injection attacks
+- Helm operations follow the same security principles with read operations enabled by default and write operations disabled by default
 
 ## Follow WeChat Official Account
 ![AI技术小林](./docs/qrcode.png)
