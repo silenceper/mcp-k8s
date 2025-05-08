@@ -72,7 +72,7 @@
 
 ### 3. 核心组件
 
-1. **MCP 服务器**：使用 mcp-go 的 `server` 包创建基于 stdio 的 MCP 服务器
+1. **MCP 服务器**：使用 mcp-go 的 `mcp-k8s` 包创建基于 stdio 的 MCP 服务器
 2. **K8s 客户端**：使用 client-go 连接到 Kubernetes 集群
 3. **Helm 客户端**：使用 Helm v3 库进行 Helm 操作
 4. **工具实现**：实现各种 MCP 工具用于不同的 Kubernetes 操作
@@ -193,12 +193,18 @@ docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/sil
 ### 直接使用
 您可以直接从 [releases 页面](https://github.com/silenceper/mcp-k8s/releases) 下载适合您平台的二进制文件并立即使用。
 
+### 使用 Go Install
+
+```bash
+go install github.com/silenceper/mcp-k8s/cmd/mcp-k8s@latest
+```
+
 ### 构建
 
 ```bash
 git clone https://github.com/silenceper/mcp-k8s.git
 cd mcp-k8s
-go build -o bin/mcp-k8s cmd/server/main.go
+go build -o bin/mcp-k8s cmd/mcp-k8s/main.go
 ```
 
 ### 命令行参数

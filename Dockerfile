@@ -15,7 +15,7 @@ ARG TARGETOS
 ARG TARGETARCH
 
 # Build
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="${LDFLAGS}" -a -o mcp-k8s /go/src/github.com/silenceper/mcp-k8s/cmd/server
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="${LDFLAGS}" -a -o mcp-k8s /go/src/github.com/silenceper/mcp-k8s/cmd/mcp-k8s
 
 # Copy the cmd into a thin image
 FROM ${BASEIMAGE}
