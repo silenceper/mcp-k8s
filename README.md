@@ -72,7 +72,7 @@ An stdio-based MCP server that connects to Kubernetes clusters and provides the 
 
 ### 3. Core Components
 
-1. **MCP Server**: Uses mcp-go's `server` package to create an stdio-based MCP server
+1. **MCP Server**: Uses mcp-go's `mcp-k8s` package to create an stdio-based MCP server
 2. **K8s Client**: Uses client-go to connect to Kubernetes clusters
 3. **Helm Client**: Uses Helm v3 library for Helm operations
 4. **Tool Implementations**: Implements various MCP tools for different Kubernetes operations
@@ -193,12 +193,18 @@ docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/sil
 ### Direct Usage
 You can directly download the binary for your platform from the [releases page](https://github.com/silenceper/mcp-k8s/releases) and use it immediately.
 
+### Go Install
+
+```bash
+go install github.com/silenceper/mcp-k8s/cmd/mcp-k8s@latest
+```
+
 ### Build
 
 ```bash
 git clone https://github.com/silenceper/mcp-k8s.git
 cd mcp-k8s
-go build -o bin/mcp-k8s cmd/server/main.go
+go build -o bin/mcp-k8s cmd/mcp-k8s/main.go
 ```
 
 ### Command Line Arguments
