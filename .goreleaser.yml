@@ -7,7 +7,7 @@ before:
 
 builds:
   - id: mcp-k8s
-    main: ./cmd/server
+    main: ./cmd/mcp-k8s
     binary: mcp-k8s
     env:
       - CGO_ENABLED=0
