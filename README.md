@@ -101,7 +101,7 @@ An stdio-based MCP server that connects to Kubernetes clusters and provides the 
 
 ## Usage
 
-mcp-k8s supports two communication modes:
+mcp-k8s supports three communication modes:
 
 ### 1. Stdio Mode (Default)
 
@@ -117,14 +117,14 @@ In stdio mode, mcp-k8s communicates with the client through standard input/outpu
             "command": "/path/to/mcp-k8s",
             "args":
             [
-                "-kubeconfig",
+                "--kubeconfig",
                 "/path/to/kubeconfig",
-                "-enable-create",
-                "-enable-delete",
-                "-enable-update",
-                "-enable-list",
-                "-enable-helm-install",
-                "-enable-helm-upgrade"
+                "--enable-create",
+                "--enable-delete",
+                "--enable-update",
+                "--enable-list",
+                "--enable-helm-install",
+                "--enable-helm-upgrade"
             ]
         }
     }
@@ -138,7 +138,7 @@ You can deploy the service on a remote server (but you need to pay attention to 
 
 ```bash
 # Run in SSE mode
-./bin/mcp-k8s -kubeconfig=/path/to/kubeconfig -transport=sse -port=8080 -host=localhost -enable-create -enable-delete -enable-list -enable-update -enable-helm-install
+./bin/mcp-k8s --kubeconfig=/path/to/kubeconfig --transport=sse --port=8080 --host=localhost --enable-create --enable-delete --enable-list --enable-update --enable-helm-install
 # This command will open all operations
 ```
 
@@ -155,17 +155,50 @@ mcp config
 ```
 
 SSE mode configuration:
-- `-transport`: Set to "sse" to enable SSE mode
-- `-port`: HTTP server port (default: 8080)
+- `--transport`: Set to "sse" to enable SSE mode
+- `--port`: HTTP server port (default: 8080)
 - `--host`: HTTP server host (default: "localhost")
 
-### 3. Docker environment
+### 3. Streamable HTTP Mode
+
+In Streamable HTTP mode, mcp-k8s exposes an HTTP endpoint that supports both direct HTTP responses and SSE streams. This mode provides better flexibility and supports streaming output.
+
+```bash
+# Run in Streamable HTTP mode
+./bin/mcp-k8s --kubeconfig=/path/to/kubeconfig --transport=streamable-http --port=8080 --host=localhost --endpoint-path=/mcp --enable-create --enable-delete --enable-list --enable-update --enable-helm-install
+```
+
+mcp config
+```json
+{
+  "mcpServers": {
+    "mcp-k8s": {
+      "url": "http://localhost:8080/mcp",
+      "args": []
+    }
+  }
+}
+```
+
+Streamable HTTP mode configuration:
+- `--transport`: Set to "streamable-http" to enable Streamable HTTP mode
+- `--port`: HTTP server port (default: 8080)
+- `--host`: HTTP server host (default: "localhost")
+- `--endpoint-path`: Endpoint path for the MCP server (default: "/mcp")
+
+### 4. Docker environment
 #### SSE Mode
 
 1. Complete Example
 Assuming your image name is mcp-k8s and you need to map ports and set environment parameters, you can run:
 ```bash
-docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/silenceper/mcp-k8s:latest -transport=sse
+docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/silenceper/mcp-k8s:latest --transport=sse
+```
+
+#### Streamable HTTP Mode
+
+```bash
+docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/silenceper/mcp-k8s:latest --transport=streamable-http --endpoint-path=/mcp
 ```
 #### stdio Mode
 
@@ -201,35 +234,72 @@ go install github.com/silenceper/mcp-k8s/cmd/mcp-k8s@latest
 
 ### Build
 
+#### Using Makefile (Recommended)
+
+The Makefile automatically injects version information from the VERSION file:
+
+```bash
+git clone https://github.com/silenceper/mcp-k8s.git
+cd mcp-k8s
+make build
+```
+
+This will build with version information injected via ldflags.
+
+#### Direct Build
+
 ```bash
 git clone https://github.com/silenceper/mcp-k8s.git
 cd mcp-k8s
 go build -o bin/mcp-k8s cmd/mcp-k8s/main.go
 ```
 
+Note: Direct build will show version as "dev" unless you specify ldflags manually.
+
 ### Command Line Arguments
 
+You can use `mcp-k8s --help` to see all available options, or `mcp-k8s --version` to check the version.
+
 #### Kubernetes Resource Operations
-- `-kubeconfig`: Path to Kubernetes configuration file (uses default config if not specified)
-- `-enable-create`: Enable resource creation operations (default: false)
-- `-enable-update`: Enable resource update operations (default: false)
-- `-enable-delete`: Enable resource deletion operations (default: false)
-- `-enable-list`: Enable resource list operations (default: true)
+- `--kubeconfig`: Path to Kubernetes configuration file (uses default config if not specified)
+- `--enable-create`: Enable resource creation operations (default: false)
+- `--enable-update`: Enable resource update operations (default: false)
+- `--enable-delete`: Enable resource deletion operations (default: false)
+- `--enable-list`: Enable resource list operations (default: true)
 
 #### Helm Operations
-- `-enable-helm-release-list`: Enable Helm release list operations (default: true)
-- `-enable-helm-release-get`: Enable Helm release get operations (default: true)
-- `-enable-helm-install`: Enable Helm chart installation (default: false)
-- `-enable-helm-upgrade`: Enable Helm chart upgrade (default: false)
-- `-enable-helm-uninstall`: Enable Helm chart uninstallation (default: false)
-- `-enable-helm-repo-list`: Enable Helm repository list operations (default: true)
-- `-enable-helm-repo-add`: Enable Helm repository add operations (default: false)
-- `-enable-helm-repo-remove`: Enable Helm repository remove operations (default: false)
+- `--enable-helm-release-list`: Enable Helm release list operations (default: true)
+- `--enable-helm-release-get`: Enable Helm release get operations (default: true)
+- `--enable-helm-install`: Enable Helm chart installation (default: false)
+- `--enable-helm-upgrade`: Enable Helm chart upgrade (default: false)
+- `--enable-helm-uninstall`: Enable Helm chart uninstallation (default: false)
+- `--enable-helm-repo-list`: Enable Helm repository list operations (default: true)
+- `--enable-helm-repo-add`: Enable Helm repository add operations (default: false)
+- `--enable-helm-repo-remove`: Enable Helm repository remove operations (default: false)
 
 #### Transport Configuration
-- `-transport`: Transport type (stdio or sse) (default: "stdio")
-- `-host`: Host for SSE transport (default "localhost")
-- `-port`: TCP port for SSE transport (default 8080)
+- `--transport`: Transport type (stdio, sse, or streamable-http) (default: "stdio")
+- `--host`: Host for HTTP transport (SSE or Streamable HTTP) (default: "localhost")
+- `--port`: TCP port for HTTP transport (SSE or Streamable HTTP) (default: 8080)
+- `--endpoint-path`: Endpoint path for Streamable HTTP transport (default: "/mcp")
+
+#### Version Information
+- `--version`: Display version information including version, commit hash, and build date
+- `--help` or `-h`: Display help information
+
+### Testing Streamable HTTP
+
+To test if Streamable HTTP mode is working correctly, you can use the provided test script:
+
+```bash
+# Start the server in one terminal
+./bin/mcp-k8s --transport=streamable-http --port=8080 --enable-list
+
+# In another terminal, run the test script
+./test_streamable_http.sh
+```
+
+For detailed testing instructions, see [TEST_STREAMABLE_HTTP.md](./TEST_STREAMABLE_HTTP.md).
 
 ### Integration with MCP Clients
 

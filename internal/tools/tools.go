@@ -123,16 +123,8 @@ func CreateDeleteResourceTool() mcp.Tool {
 // HandleGetAPIResources handles the get API resources tool
 func HandleGetAPIResources(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		includeNamespaceScoped := true
-		includeClusterScoped := true
-
-		if val, ok := request.Params.Arguments["includeNamespaceScoped"].(bool); ok {
-			includeNamespaceScoped = val
-		}
-
-		if val, ok := request.Params.Arguments["includeClusterScoped"].(bool); ok {
-			includeClusterScoped = val
-		}
+		includeNamespaceScoped := request.GetBool("includeNamespaceScoped", true)
+		includeClusterScoped := request.GetBool("includeClusterScoped", true)
 
 		resources, err := client.GetAPIResources(ctx, includeNamespaceScoped, includeClusterScoped)
 		if err != nil {
@@ -151,17 +143,17 @@ func HandleGetAPIResources(client *k8s.Client) func(ctx context.Context, request
 // HandleGetResource handles the get resource tool
 func HandleGetResource(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		kind, ok := request.Params.Arguments["kind"].(string)
-		if !ok || kind == "" {
-			return nil, fmt.Errorf("missing required parameter: kind")
+		kind, err := request.RequireString("kind")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: kind: %w", err)
 		}
 
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("missing required parameter: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		namespace, _ := request.Params.Arguments["namespace"].(string)
+		namespace := request.GetString("namespace", "")
 
 		resource, err := client.GetResource(ctx, kind, name, namespace)
 		if err != nil {
@@ -180,14 +172,14 @@ func HandleGetResource(client *k8s.Client) func(ctx context.Context, request mcp
 // HandleListResources handles the list resources tool
 func HandleListResources(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		kind, ok := request.Params.Arguments["kind"].(string)
-		if !ok || kind == "" {
-			return nil, fmt.Errorf("missing required parameter: kind")
+		kind, err := request.RequireString("kind")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: kind: %w", err)
 		}
 
-		namespace, _ := request.Params.Arguments["namespace"].(string)
-		labelSelector, _ := request.Params.Arguments["labelSelector"].(string)
-		fieldSelector, _ := request.Params.Arguments["fieldSelector"].(string)
+		namespace := request.GetString("namespace", "")
+		labelSelector := request.GetString("labelSelector", "")
+		fieldSelector := request.GetString("fieldSelector", "")
 
 		resources, err := client.ListResources(ctx, kind, namespace, labelSelector, fieldSelector)
 		if err != nil {
@@ -206,17 +198,17 @@ func HandleListResources(client *k8s.Client) func(ctx context.Context, request m
 // HandleCreateResource handles the create resource tool
 func HandleCreateResource(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		kind, ok := request.Params.Arguments["kind"].(string)
-		if !ok || kind == "" {
-			return nil, fmt.Errorf("missing required parameter: kind")
+		kind, err := request.RequireString("kind")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: kind: %w", err)
 		}
 
-		manifest, ok := request.Params.Arguments["manifest"].(string)
-		if !ok || manifest == "" {
-			return nil, fmt.Errorf("missing required parameter: manifest")
+		manifest, err := request.RequireString("manifest")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: manifest: %w", err)
 		}
 
-		namespace, _ := request.Params.Arguments["namespace"].(string)
+		namespace := request.GetString("namespace", "")
 
 		resource, err := client.CreateResource(ctx, kind, namespace, manifest)
 		if err != nil {
@@ -235,22 +227,22 @@ func HandleCreateResource(client *k8s.Client) func(ctx context.Context, request 
 // HandleUpdateResource handles the update resource tool
 func HandleUpdateResource(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		kind, ok := request.Params.Arguments["kind"].(string)
-		if !ok || kind == "" {
-			return nil, fmt.Errorf("missing required parameter: kind")
+		kind, err := request.RequireString("kind")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: kind: %w", err)
 		}
 
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("missing required parameter: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		manifest, ok := request.Params.Arguments["manifest"].(string)
-		if !ok || manifest == "" {
-			return nil, fmt.Errorf("missing required parameter: manifest")
+		manifest, err := request.RequireString("manifest")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: manifest: %w", err)
 		}
 
-		namespace, _ := request.Params.Arguments["namespace"].(string)
+		namespace := request.GetString("namespace", "")
 
 		resource, err := client.UpdateResource(ctx, kind, name, namespace, manifest)
 		if err != nil {
@@ -269,19 +261,19 @@ func HandleUpdateResource(client *k8s.Client) func(ctx context.Context, request 
 // HandleDeleteResource handles the delete resource tool
 func HandleDeleteResource(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		kind, ok := request.Params.Arguments["kind"].(string)
-		if !ok || kind == "" {
-			return nil, fmt.Errorf("missing required parameter: kind")
+		kind, err := request.RequireString("kind")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: kind: %w", err)
 		}
 
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("missing required parameter: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		namespace, _ := request.Params.Arguments["namespace"].(string)
+		namespace := request.GetString("namespace", "")
 
-		err := client.DeleteResource(ctx, kind, name, namespace)
+		err = client.DeleteResource(ctx, kind, name, namespace)
 		if err != nil {
 			return nil, err
 		}

@@ -9,155 +9,152 @@ import (
 	"github.com/silenceper/mcp-k8s/internal/k8s"
 )
 
-// CreateListHelmReleasesTool 创建列出所有 Helm Releases 的工具
+// CreateListHelmReleasesTool creates a tool for listing all Helm Releases
 func CreateListHelmReleasesTool() mcp.Tool {
 	return mcp.NewTool("list_helm_releases",
-		mcp.WithDescription("列出所有已安装的 Helm charts"),
+		mcp.WithDescription("List all installed Helm charts"),
 		mcp.WithBoolean("all_namespaces",
-			mcp.Description("是否列出所有命名空间的 releases"),
+			mcp.Description("Whether to list releases from all namespaces"),
 			mcp.DefaultBool(false),
 		),
 	)
 }
 
-// CreateGetHelmReleaseTool 创建获取单个 Helm Release 的工具
+// CreateGetHelmReleaseTool creates a tool for getting a single Helm Release
 func CreateGetHelmReleaseTool() mcp.Tool {
 	return mcp.NewTool("get_helm_release",
-		mcp.WithDescription("获取指定 Helm release 的详细信息"),
+		mcp.WithDescription("Get detailed information about a specific Helm release"),
 		mcp.WithString("name",
 			mcp.Required(),
-			mcp.Description("Release 的名称"),
+			mcp.Description("Name of the release"),
 		),
 	)
 }
 
-// CreateInstallHelmChartTool 创建安装 Helm Chart 的工具
+// CreateInstallHelmChartTool creates a tool for installing a Helm Chart
 func CreateInstallHelmChartTool() mcp.Tool {
 	return mcp.NewTool("install_helm_chart",
-		mcp.WithDescription("安装 Helm chart"),
+		mcp.WithDescription("Install a Helm chart"),
 		mcp.WithString("name",
 			mcp.Required(),
-			mcp.Description("要安装的 Release 名称"),
+			mcp.Description("Name of the release to install"),
 		),
 		mcp.WithString("chart",
 			mcp.Required(),
-			mcp.Description("Chart 名称"),
+			mcp.Description("Chart name"),
 		),
 		mcp.WithString("namespace",
-			mcp.Description("目标命名空间（如果不指定，使用当前命名空间）"),
+			mcp.Description("Target namespace (if not specified, use current namespace)"),
 		),
 		mcp.WithString("version",
-			mcp.Description("Chart 版本"),
+			mcp.Description("Chart version"),
 		),
 		mcp.WithString("repo",
-			mcp.Description("仓库名称（如果不指定，使用本地或远程 chart）"),
+			mcp.Description("Repository name (if not specified, use local or remote chart)"),
 		),
 		mcp.WithString("values",
-			mcp.Description("YAML 格式的值，将覆盖默认值"),
+			mcp.Description("YAML format values that will override default values"),
 		),
 	)
 }
 
-// CreateUpgradeHelmChartTool 创建升级 Helm Chart 的工具
+// CreateUpgradeHelmChartTool creates a tool for upgrading a Helm Chart
 func CreateUpgradeHelmChartTool() mcp.Tool {
 	return mcp.NewTool("upgrade_helm_chart",
-		mcp.WithDescription("升级 Helm chart"),
+		mcp.WithDescription("Upgrade a Helm chart"),
 		mcp.WithString("name",
 			mcp.Required(),
-			mcp.Description("要升级的 Release 名称"),
+			mcp.Description("Name of the release to upgrade"),
 		),
 		mcp.WithString("chart",
 			mcp.Required(),
-			mcp.Description("Chart 名称"),
+			mcp.Description("Chart name"),
 		),
 		mcp.WithString("namespace",
-			mcp.Description("Release 所在的命名空间（如果不指定，使用当前命名空间）"),
+			mcp.Description("Namespace where the release is located (if not specified, use current namespace)"),
 		),
 		mcp.WithString("version",
-			mcp.Description("Chart 版本"),
+			mcp.Description("Chart version"),
 		),
 		mcp.WithString("repo",
-			mcp.Description("仓库名称（如果不指定，使用本地或远程 chart）"),
+			mcp.Description("Repository name (if not specified, use local or remote chart)"),
 		),
 		mcp.WithString("values",
-			mcp.Description("YAML 格式的值，将覆盖默认值"),
+			mcp.Description("YAML format values that will override default values"),
 		),
 	)
 }
 
-// CreateUninstallHelmChartTool 创建卸载 Helm Chart 的工具
+// CreateUninstallHelmChartTool creates a tool for uninstalling a Helm Chart
 func CreateUninstallHelmChartTool() mcp.Tool {
 	return mcp.NewTool("uninstall_helm_chart",
-		mcp.WithDescription("卸载 Helm chart"),
+		mcp.WithDescription("Uninstall a Helm chart"),
 		mcp.WithString("name",
 			mcp.Required(),
-			mcp.Description("要卸载的 Release 名称"),
+			mcp.Description("Name of the release to uninstall"),
 		),
 		mcp.WithString("namespace",
-			mcp.Description("Release 所在的命名空间（如果不指定，使用当前命名空间）"),
+			mcp.Description("Namespace where the release is located (if not specified, use current namespace)"),
 		),
 	)
 }
 
-// CreateListHelmRepositoriesTool 创建列出 Helm 仓库的工具
+// CreateListHelmRepositoriesTool creates a tool for listing Helm repositories
 func CreateListHelmRepositoriesTool() mcp.Tool {
 	return mcp.NewTool("list_helm_repos",
-		mcp.WithDescription("列出所有配置的 Helm 仓库"),
+		mcp.WithDescription("List all configured Helm repositories"),
 	)
 }
 
-// CreateAddHelmRepositoryTool 创建添加 Helm 仓库的工具
+// CreateAddHelmRepositoryTool creates a tool for adding a Helm repository
 func CreateAddHelmRepositoryTool() mcp.Tool {
 	return mcp.NewTool("add_helm_repo",
-		mcp.WithDescription("添加 Helm 仓库"),
+		mcp.WithDescription("Add a Helm repository"),
 		mcp.WithString("name",
 			mcp.Required(),
-			mcp.Description("仓库名称"),
+			mcp.Description("Repository name"),
 		),
 		mcp.WithString("url",
 			mcp.Required(),
-			mcp.Description("仓库 URL"),
+			mcp.Description("Repository URL"),
 		),
 		mcp.WithString("username",
-			mcp.Description("访问仓库的用户名（如果需要）"),
+			mcp.Description("Username to access the repository (if needed)"),
 		),
 		mcp.WithString("password",
-			mcp.Description("访问仓库的密码（如果需要）"),
+			mcp.Description("Password to access the repository (if needed)"),
 		),
 	)
 }
 
-// CreateRemoveHelmRepositoryTool 创建移除 Helm 仓库的工具
+// CreateRemoveHelmRepositoryTool creates a tool for removing a Helm repository
 func CreateRemoveHelmRepositoryTool() mcp.Tool {
 	return mcp.NewTool("remove_helm_repo",
-		mcp.WithDescription("移除 Helm 仓库"),
+		mcp.WithDescription("Remove a Helm repository"),
 		mcp.WithString("name",
 			mcp.Required(),
-			mcp.Description("仓库名称"),
+			mcp.Description("Repository name"),
 		),
 	)
 }
 
-// GetHelmClient 获取共享的 Helm 客户端
+// GetHelmClient gets a shared Helm client
 func GetHelmClient(client *k8s.Client, namespace string) (*k8s.HelmClient, error) {
 	return k8s.NewHelmClient(namespace, client.GetKubeconfigPath())
 }
 
-// HandleListHelmReleases 处理列出 Helm Releases 的请求
+// HandleListHelmReleases handles the request to list Helm Releases
 func HandleListHelmReleases(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		allNamespaces := false
-		if val, ok := request.Params.Arguments["all_namespaces"].(bool); ok {
-			allNamespaces = val
-		}
+		allNamespaces := request.GetBool("all_namespaces", false)
 
-		// 获取 Helm 客户端
+		// Get Helm client
 		helmClient, err := GetHelmClient(client, "")
 		if err != nil {
-			return nil, fmt.Errorf("创建 Helm 客户端失败: %w", err)
+			return nil, fmt.Errorf("failed to create Helm client: %w", err)
 		}
 
-		// 列出所有 releases
+		// List all releases
 		releases, err := helmClient.ListReleases(allNamespaces)
 		if err != nil {
 			return nil, err
@@ -165,28 +162,28 @@ func HandleListHelmReleases(client *k8s.Client) func(ctx context.Context, reques
 
 		jsonResponse, err := json.Marshal(releases)
 		if err != nil {
-			return nil, fmt.Errorf("序列化响应失败: %w", err)
+			return nil, fmt.Errorf("failed to serialize response: %w", err)
 		}
 
 		return mcp.NewToolResultText(string(jsonResponse)), nil
 	}
 }
 
-// HandleGetHelmRelease 处理获取单个 Helm Release 的请求
+// HandleGetHelmRelease handles the request to get a single Helm Release
 func HandleGetHelmRelease(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("缺少必需的参数: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		// 获取 Helm 客户端
+		// Get Helm client
 		helmClient, err := GetHelmClient(client, "")
 		if err != nil {
-			return nil, fmt.Errorf("创建 Helm 客户端失败: %w", err)
+			return nil, fmt.Errorf("failed to create Helm client: %w", err)
 		}
 
-		// 获取 release 详情
+		// Get release details
 		release, err := helmClient.GetRelease(name)
 		if err != nil {
 			return nil, err
@@ -194,44 +191,44 @@ func HandleGetHelmRelease(client *k8s.Client) func(ctx context.Context, request 
 
 		jsonResponse, err := json.Marshal(release)
 		if err != nil {
-			return nil, fmt.Errorf("序列化响应失败: %w", err)
+			return nil, fmt.Errorf("failed to serialize response: %w", err)
 		}
 
 		return mcp.NewToolResultText(string(jsonResponse)), nil
 	}
 }
 
-// HandleInstallHelmChart 处理安装 Helm Chart 的请求
+// HandleInstallHelmChart handles the request to install a Helm Chart
 func HandleInstallHelmChart(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("缺少必需的参数: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		chart, ok := request.Params.Arguments["chart"].(string)
-		if !ok || chart == "" {
-			return nil, fmt.Errorf("缺少必需的参数: chart")
+		chart, err := request.RequireString("chart")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: chart: %w", err)
 		}
 
-		namespace, _ := request.Params.Arguments["namespace"].(string)
-		version, _ := request.Params.Arguments["version"].(string)
-		repo, _ := request.Params.Arguments["repo"].(string)
-		valuesYaml, _ := request.Params.Arguments["values"].(string)
+		namespace := request.GetString("namespace", "")
+		version := request.GetString("version", "")
+		repo := request.GetString("repo", "")
+		valuesYaml := request.GetString("values", "")
 
-		// 解析 YAML 格式的值
+		// Parse YAML format values
 		values, err := k8s.ParseYamlValues(valuesYaml)
 		if err != nil {
 			return nil, err
 		}
 
-		// 获取 Helm 客户端
+		// Get Helm client
 		helmClient, err := GetHelmClient(client, namespace)
 		if err != nil {
-			return nil, fmt.Errorf("创建 Helm 客户端失败: %w", err)
+			return nil, fmt.Errorf("failed to create Helm client: %w", err)
 		}
 
-		// 安装 chart
+		// Install chart
 		release, err := helmClient.InstallChart(name, chart, values, version, repo)
 		if err != nil {
 			return nil, err
@@ -239,44 +236,44 @@ func HandleInstallHelmChart(client *k8s.Client) func(ctx context.Context, reques
 
 		jsonResponse, err := json.Marshal(release)
 		if err != nil {
-			return nil, fmt.Errorf("序列化响应失败: %w", err)
+			return nil, fmt.Errorf("failed to serialize response: %w", err)
 		}
 
 		return mcp.NewToolResultText(string(jsonResponse)), nil
 	}
 }
 
-// HandleUpgradeHelmChart 处理升级 Helm Chart 的请求
+// HandleUpgradeHelmChart handles the request to upgrade a Helm Chart
 func HandleUpgradeHelmChart(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("缺少必需的参数: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		chart, ok := request.Params.Arguments["chart"].(string)
-		if !ok || chart == "" {
-			return nil, fmt.Errorf("缺少必需的参数: chart")
+		chart, err := request.RequireString("chart")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: chart: %w", err)
 		}
 
-		namespace, _ := request.Params.Arguments["namespace"].(string)
-		version, _ := request.Params.Arguments["version"].(string)
-		repo, _ := request.Params.Arguments["repo"].(string)
-		valuesYaml, _ := request.Params.Arguments["values"].(string)
+		namespace := request.GetString("namespace", "")
+		version := request.GetString("version", "")
+		repo := request.GetString("repo", "")
+		valuesYaml := request.GetString("values", "")
 
-		// 解析 YAML 格式的值
+		// Parse YAML format values
 		values, err := k8s.ParseYamlValues(valuesYaml)
 		if err != nil {
 			return nil, err
 		}
 
-		// 获取 Helm 客户端
+		// Get Helm client
 		helmClient, err := GetHelmClient(client, namespace)
 		if err != nil {
-			return nil, fmt.Errorf("创建 Helm 客户端失败: %w", err)
+			return nil, fmt.Errorf("failed to create Helm client: %w", err)
 		}
 
-		// 升级 chart
+		// Upgrade chart
 		release, err := helmClient.UpgradeChart(name, chart, values, version, repo)
 		if err != nil {
 			return nil, err
@@ -284,49 +281,49 @@ func HandleUpgradeHelmChart(client *k8s.Client) func(ctx context.Context, reques
 
 		jsonResponse, err := json.Marshal(release)
 		if err != nil {
-			return nil, fmt.Errorf("序列化响应失败: %w", err)
+			return nil, fmt.Errorf("failed to serialize response: %w", err)
 		}
 
 		return mcp.NewToolResultText(string(jsonResponse)), nil
 	}
 }
 
-// HandleUninstallHelmChart 处理卸载 Helm Chart 的请求
+// HandleUninstallHelmChart handles the request to uninstall a Helm Chart
 func HandleUninstallHelmChart(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("缺少必需的参数: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		namespace, _ := request.Params.Arguments["namespace"].(string)
+		namespace := request.GetString("namespace", "")
 
-		// 获取 Helm 客户端
+		// Get Helm client
 		helmClient, err := GetHelmClient(client, namespace)
 		if err != nil {
-			return nil, fmt.Errorf("创建 Helm 客户端失败: %w", err)
+			return nil, fmt.Errorf("failed to create Helm client: %w", err)
 		}
 
-		// 卸载 chart
+		// Uninstall chart
 		err = helmClient.UninstallChart(name)
 		if err != nil {
 			return nil, err
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("成功卸载 Helm release: %s", name)), nil
+		return mcp.NewToolResultText(fmt.Sprintf("Successfully uninstalled Helm release: %s", name)), nil
 	}
 }
 
-// HandleListHelmRepositories 处理列出 Helm 仓库的请求
+// HandleListHelmRepositories handles the request to list Helm repositories
 func HandleListHelmRepositories(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// 获取 Helm 客户端
+		// Get Helm client
 		helmClient, err := GetHelmClient(client, "")
 		if err != nil {
-			return nil, fmt.Errorf("创建 Helm 客户端失败: %w", err)
+			return nil, fmt.Errorf("failed to create Helm client: %w", err)
 		}
 
-		// 列出所有仓库
+		// List all repositories
 		repos, err := helmClient.ListRepositories()
 		if err != nil {
 			return nil, err
@@ -334,72 +331,72 @@ func HandleListHelmRepositories(client *k8s.Client) func(ctx context.Context, re
 
 		jsonResponse, err := json.Marshal(repos)
 		if err != nil {
-			return nil, fmt.Errorf("序列化响应失败: %w", err)
+			return nil, fmt.Errorf("failed to serialize response: %w", err)
 		}
 
 		return mcp.NewToolResultText(string(jsonResponse)), nil
 	}
 }
 
-// HandleAddHelmRepository 处理添加 Helm 仓库的请求
+// HandleAddHelmRepository handles the request to add a Helm repository
 func HandleAddHelmRepository(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("缺少必需的参数: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		url, ok := request.Params.Arguments["url"].(string)
-		if !ok || url == "" {
-			return nil, fmt.Errorf("缺少必需的参数: url")
+		url, err := request.RequireString("url")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: url: %w", err)
 		}
 
-		username, _ := request.Params.Arguments["username"].(string)
-		password, _ := request.Params.Arguments["password"].(string)
+		username := request.GetString("username", "")
+		password := request.GetString("password", "")
 
-		// 获取 Helm 客户端
+		// Get Helm client
 		helmClient, err := GetHelmClient(client, "")
 		if err != nil {
-			return nil, fmt.Errorf("创建 Helm 客户端失败: %w", err)
+			return nil, fmt.Errorf("failed to create Helm client: %w", err)
 		}
 
-		// 添加仓库
+		// Add repository
 		repo := &k8s.HelmRepository{
 			Name:     name,
 			URL:      url,
 			Username: username,
 			Password: password,
 		}
-		
+
 		err = helmClient.AddRepository(repo)
 		if err != nil {
 			return nil, err
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("成功添加 Helm 仓库: %s", name)), nil
+		return mcp.NewToolResultText(fmt.Sprintf("Successfully added Helm repository: %s", name)), nil
 	}
 }
 
-// HandleRemoveHelmRepository 处理移除 Helm 仓库的请求
+// HandleRemoveHelmRepository handles the request to remove a Helm repository
 func HandleRemoveHelmRepository(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		name, ok := request.Params.Arguments["name"].(string)
-		if !ok || name == "" {
-			return nil, fmt.Errorf("缺少必需的参数: name")
+		name, err := request.RequireString("name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: name: %w", err)
 		}
 
-		// 获取 Helm 客户端
+		// Get Helm client
 		helmClient, err := GetHelmClient(client, "")
 		if err != nil {
-			return nil, fmt.Errorf("创建 Helm 客户端失败: %w", err)
+			return nil, fmt.Errorf("failed to create Helm client: %w", err)
 		}
 
-		// 移除仓库
+		// Remove repository
 		err = helmClient.RemoveRepository(name)
 		if err != nil {
 			return nil, err
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("成功移除 Helm 仓库: %s", name)), nil
+		return mcp.NewToolResultText(fmt.Sprintf("Successfully removed Helm repository: %s", name)), nil
 	}
-} 
+}

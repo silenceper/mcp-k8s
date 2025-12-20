@@ -5,37 +5,37 @@ import (
 	"os"
 )
 
-// Config 表示应用程序配置
+// Config represents the application configuration
 type Config struct {
-	// Kubeconfig 文件路径
+	// Kubeconfig file path
 	KubeconfigPath string
-	// 是否启用资源创建操作
+	// Whether to enable resource creation operations
 	EnableCreate bool
-	// 是否启用资源更新操作
+	// Whether to enable resource update operations
 	EnableUpdate bool
-	// 是否启用资源删除操作
+	// Whether to enable resource deletion operations
 	EnableDelete bool
-	// 是否启用资源列表操作
+	// Whether to enable resource list operations
 	EnableList bool
-	// 是否启用 Helm 安装操作
+	// Whether to enable Helm install operations
 	EnableHelmInstall bool
-	// 是否启用 Helm 升级操作
+	// Whether to enable Helm upgrade operations
 	EnableHelmUpgrade bool
-	// 是否启用 Helm 卸载操作
+	// Whether to enable Helm uninstall operations
 	EnableHelmUninstall bool
-	// 是否启用 Helm 仓库添加操作
+	// Whether to enable Helm repository add operations
 	EnableHelmRepoAdd bool
-	// 是否启用 Helm 仓库删除操作
+	// Whether to enable Helm repository remove operations
 	EnableHelmRepoRemove bool
-	// 是否启用 Helm 发布版列表操作
+	// Whether to enable Helm release list operations
 	EnableHelmReleaseList bool
-	// 是否启用 Helm 发布版查询操作
+	// Whether to enable Helm release get operations
 	EnableHelmReleaseGet bool
-	// 是否启用 Helm 仓库列表操作
+	// Whether to enable Helm repository list operations
 	EnableHelmRepoList bool
 }
 
-// NewConfig 从命令行参数创建配置
+// NewConfig creates a configuration from command line arguments
 func NewConfig(kubeconfigPath string, enableCreate, enableUpdate, enableDelete, enableList bool) *Config {
 	return &Config{
 		KubeconfigPath: kubeconfigPath,
@@ -46,26 +46,26 @@ func NewConfig(kubeconfigPath string, enableCreate, enableUpdate, enableDelete, 
 	}
 }
 
-// Validate 验证配置是否有效
+// Validate validates whether the configuration is valid
 func (c *Config) Validate() error {
-	// 检查 kubeconfig 是否可访问
+	// Check if kubeconfig is accessible
 	if c.KubeconfigPath != "" {
 		_, err := os.Stat(c.KubeconfigPath)
 		if err != nil {
-			return fmt.Errorf("无法访问 kubeconfig 文件: %w", err)
+			return fmt.Errorf("cannot access kubeconfig file: %w", err)
 		}
 	}
 	return nil
 }
 
-// InitHelmDefaults 初始化Helm相关的默认配置
+// InitHelmDefaults initializes Helm-related default configuration
 func (c *Config) InitHelmDefaults() {
-	// 读操作默认开启
+	// Read operations are enabled by default
 	c.EnableHelmReleaseList = true
 	c.EnableHelmReleaseGet = true
 	c.EnableHelmRepoList = true
-	
-	// 写操作默认关闭
+
+	// Write operations are disabled by default
 	c.EnableHelmInstall = false
 	c.EnableHelmUpgrade = false
 	c.EnableHelmUninstall = false

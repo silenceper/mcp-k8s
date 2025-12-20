@@ -101,7 +101,7 @@
 
 ## 使用方式
 
-mcp-k8s 支持两种通信模式：
+mcp-k8s 支持三种通信模式：
 
 ### 1. Stdio 模式（默认）
 
@@ -117,14 +117,14 @@ mcp-k8s 支持两种通信模式：
             "command": "/path/to/mcp-k8s",
             "args":
             [
-                "-kubeconfig",
+                "--kubeconfig",
                 "/path/to/kubeconfig",
-                "-enable-create",
-                "-enable-delete",
-                "-enable-update",
-                "-enable-list",
-                "-enable-helm-install",
-                "-enable-helm-upgrade"
+                "--enable-create",
+                "--enable-delete",
+                "--enable-update",
+                "--enable-list",
+                "--enable-helm-install",
+                "--enable-helm-upgrade"
             ]
         }
     }
@@ -138,7 +138,7 @@ mcp-k8s 支持两种通信模式：
 
 ```bash
 # 以 SSE 模式运行
-./bin/mcp-k8s -kubeconfig=/path/to/kubeconfig -transport=sse -port=8080 -host=localhost -enable-create -enable-delete -enable-list -enable-update -enable-helm-install
+./bin/mcp-k8s --kubeconfig=/path/to/kubeconfig --transport=sse --port=8080 --host=localhost --enable-create --enable-delete --enable-list --enable-update --enable-helm-install
 # 此命令将开启所有操作
 ```
 
@@ -155,18 +155,51 @@ mcp 配置
 ```
 
 SSE 模式配置：
-- `-transport`：设置为 "sse" 以启用 SSE 模式
-- `-port`：HTTP 服务器端口（默认：8080）
-- `-host`：HTTP 服务器主机（默认："localhost"）
+- `--transport`：设置为 "sse" 以启用 SSE 模式
+- `--port`：HTTP 服务器端口（默认：8080）
+- `--host`：HTTP 服务器主机（默认："localhost"）
 
-### 3. Docker 环境 
+### 3. Streamable HTTP 模式
+
+在 Streamable HTTP 模式下，mcp-k8s 暴露一个支持直接 HTTP 响应和 SSE 流的 HTTP 端点。此模式提供更好的灵活性并支持流式输出。
+
+```bash
+# 以 Streamable HTTP 模式运行
+./bin/mcp-k8s --kubeconfig=/path/to/kubeconfig --transport=streamable-http --port=8080 --host=localhost --endpoint-path=/mcp --enable-create --enable-delete --enable-list --enable-update --enable-helm-install
+```
+
+mcp 配置
+```json
+{
+  "mcpServers": {
+    "mcp-k8s": {
+      "url": "http://localhost:8080/mcp",
+      "args": []
+    }
+  }
+}
+```
+
+Streamable HTTP 模式配置：
+- `--transport`：设置为 "streamable-http" 以启用 Streamable HTTP 模式
+- `--port`：HTTP 服务器端口（默认：8080）
+- `--host`：HTTP 服务器主机（默认："localhost"）
+- `--endpoint-path`：MCP 服务器的端点路径（默认："/mcp"）
+
+### 4. Docker 环境 
 
 #### SSE 模式配置
 
 1. 完整示例
 假设你的镜像名为 mcp-k8s，并且需要映射端口和设置环境参数，可以运行：
 ```bash
-docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/silenceper/mcp-k8s:latest -transport=sse
+docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/silenceper/mcp-k8s:latest --transport=sse
+```
+
+#### Streamable HTTP 模式配置
+
+```bash
+docker run --rm -p 8080:8080 -i -v ~/.kube/config:/root/.kube/config ghcr.io/silenceper/mcp-k8s:latest --transport=streamable-http --endpoint-path=/mcp
 ```
 #### stdio 模式配置
 
@@ -201,35 +234,58 @@ go install github.com/silenceper/mcp-k8s/cmd/mcp-k8s@latest
 
 ### 构建
 
+#### 使用 Makefile（推荐）
+
+Makefile 会自动从 VERSION 文件注入版本信息：
+
+```bash
+git clone https://github.com/silenceper/mcp-k8s.git
+cd mcp-k8s
+make build
+```
+
+这将通过 ldflags 注入版本信息进行构建。
+
+#### 直接构建
+
 ```bash
 git clone https://github.com/silenceper/mcp-k8s.git
 cd mcp-k8s
 go build -o bin/mcp-k8s cmd/mcp-k8s/main.go
 ```
 
+注意：直接构建将显示版本为 "dev"，除非您手动指定 ldflags。
+
 ### 命令行参数
 
+您可以使用 `mcp-k8s --help` 查看所有可用选项，或使用 `mcp-k8s --version` 查看版本信息。
+
 #### Kubernetes 资源操作
-- `-kubeconfig`：Kubernetes 配置文件路径（如果未指定则使用默认配置）
-- `-enable-create`：启用资源创建操作（默认：false）
-- `-enable-update`：启用资源更新操作（默认：false）
-- `-enable-delete`：启用资源删除操作（默认：false）
-- `-enable-list`：启用资源列表操作（默认：true）
+- `--kubeconfig`：Kubernetes 配置文件路径（如果未指定则使用默认配置）
+- `--enable-create`：启用资源创建操作（默认：false）
+- `--enable-update`：启用资源更新操作（默认：false）
+- `--enable-delete`：启用资源删除操作（默认：false）
+- `--enable-list`：启用资源列表操作（默认：true）
 
 #### Helm 操作
-- `-enable-helm-release-list`：启用 Helm 发布版列表操作（默认：true）
-- `-enable-helm-release-get`：启用 Helm 发布版获取操作（默认：true）
-- `-enable-helm-install`：启用 Helm 图表安装（默认：false）
-- `-enable-helm-upgrade`：启用 Helm 图表升级（默认：false）
-- `-enable-helm-uninstall`：启用 Helm 图表卸载（默认：false）
-- `-enable-helm-repo-list`：启用 Helm 仓库列表操作（默认：true）
-- `-enable-helm-repo-add`：启用 Helm 仓库添加操作（默认：false）
-- `-enable-helm-repo-remove`：启用 Helm 仓库删除操作（默认：false）
+- `--enable-helm-release-list`：启用 Helm 发布版列表操作（默认：true）
+- `--enable-helm-release-get`：启用 Helm 发布版获取操作（默认：true）
+- `--enable-helm-install`：启用 Helm 图表安装（默认：false）
+- `--enable-helm-upgrade`：启用 Helm 图表升级（默认：false）
+- `--enable-helm-uninstall`：启用 Helm 图表卸载（默认：false）
+- `--enable-helm-repo-list`：启用 Helm 仓库列表操作（默认：true）
+- `--enable-helm-repo-add`：启用 Helm 仓库添加操作（默认：false）
+- `--enable-helm-repo-remove`：启用 Helm 仓库删除操作（默认：false）
 
 #### 传输配置
-- `-transport`：传输类型（stdio 或 sse）（默认："stdio"）
-- `-host`：SSE 传输的主机（默认 "localhost"）
-- `-port`：SSE 传输的 TCP 端口（默认 8080）
+- `--transport`：传输类型（stdio、sse 或 streamable-http）（默认："stdio"）
+- `--host`：HTTP 传输的主机（SSE 或 Streamable HTTP）（默认："localhost"）
+- `--port`：HTTP 传输的 TCP 端口（SSE 或 Streamable HTTP）（默认：8080）
+- `--endpoint-path`：Streamable HTTP 传输的端点路径（默认："/mcp"）
+
+#### 版本信息
+- `--version`：显示版本信息，包括版本号、提交哈希和构建日期
+- `--help` 或 `-h`：显示帮助信息
 
 ### 与 MCP 客户端集成
 

@@ -17,60 +17,60 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-// Client 封装了 Kubernetes 客户端功能
+// Client wraps Kubernetes client functionality
 type Client struct {
-	// 标准 clientset
+	// Standard clientset
 	clientset *kubernetes.Clientset
-	// 动态客户端
+	// Dynamic client
 	dynamicClient dynamic.Interface
-	// 发现客户端
+	// Discovery client
 	discoveryClient *discovery.DiscoveryClient
-	// REST 配置
+	// REST config
 	restConfig *rest.Config
-	// kubeconfig 路径
+	// kubeconfig path
 	kubeconfigPath string
 }
 
-// NewClient 创建一个新的 Kubernetes 客户端
+// NewClient creates a new Kubernetes client
 func NewClient(kubeconfigPath string) (*Client, error) {
 	var kubeconfig string
 	var config *rest.Config
 	var err error
 
-	// 如果提供了 kubeconfig 路径，使用它
+	// If kubeconfig path is provided, use it
 	if kubeconfigPath != "" {
 		kubeconfig = kubeconfigPath
 	} else if home := homedir.HomeDir(); home != "" {
-		// 否则尝试使用默认路径
+		// Otherwise try to use default path
 		kubeconfig = filepath.Join(home, ".kube", "config")
 	}
 
-	// 使用提供的 kubeconfig 或尝试集群内配置
+	// Use provided kubeconfig or try in-cluster config
 	if kubeconfig != "" {
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	} else {
 		config, err = rest.InClusterConfig()
 	}
 	if err != nil {
-		return nil, fmt.Errorf("创建 Kubernetes 配置失败: %w", err)
+		return nil, fmt.Errorf("failed to create Kubernetes config: %w", err)
 	}
 
-	// 创建 clientset
+	// Create clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, fmt.Errorf("创建 Kubernetes 客户端失败: %w", err)
+		return nil, fmt.Errorf("failed to create Kubernetes client: %w", err)
 	}
 
-	// 创建动态客户端
+	// Create dynamic client
 	dynamicClient, err := dynamic.NewForConfig(config)
 	if err != nil {
-		return nil, fmt.Errorf("创建动态客户端失败: %w", err)
+		return nil, fmt.Errorf("failed to create dynamic client: %w", err)
 	}
 
-	// 创建发现客户端
+	// Create discovery client
 	discoveryClient, err := discovery.NewDiscoveryClientForConfig(config)
 	if err != nil {
-		return nil, fmt.Errorf("创建发现客户端失败: %w", err)
+		return nil, fmt.Errorf("failed to create discovery client: %w", err)
 	}
 
 	return &Client{
@@ -82,24 +82,24 @@ func NewClient(kubeconfigPath string) (*Client, error) {
 	}, nil
 }
 
-// GetAPIResources 获取集群中的所有 API 资源类型
+// GetAPIResources gets all API resource types in the cluster
 func (c *Client) GetAPIResources(ctx context.Context, includeNamespaceScoped, includeClusterScoped bool) ([]map[string]interface{}, error) {
-	// 获取集群中所有 API Groups 和 Resources
+	// Get all API Groups and Resources in the cluster
 	resourceLists, err := c.discoveryClient.ServerPreferredResources()
 	if err != nil {
-		// 处理部分错误，有些资源可能无法访问
+		// Handle partial errors, some resources may not be accessible
 		if !discovery.IsGroupDiscoveryFailedError(err) {
-			return nil, fmt.Errorf("获取 API 资源失败: %w", err)
+			return nil, fmt.Errorf("failed to get API resources: %w", err)
 		}
 	}
 
 	var resources []map[string]interface{}
 
-	// 处理每个API组中的资源
+	// Process resources in each API group
 	for _, resourceList := range resourceLists {
 		groupVersion := resourceList.GroupVersion
 		for _, resource := range resourceList.APIResources {
-			// 忽略子资源
+			// Ignore sub-resources
 			if len(resource.Group) == 0 {
 				resource.Group = resourceList.GroupVersion
 			}
@@ -111,7 +111,7 @@ func (c *Client) GetAPIResources(ctx context.Context, includeNamespaceScoped, in
 				resource.Version = gv.Version
 			}
 
-			// 根据命名空间范围过滤
+			// Filter by namespace scope
 			if (resource.Namespaced && !includeNamespaceScoped) || (!resource.Namespaced && !includeClusterScoped) {
 				continue
 			}
@@ -131,9 +131,9 @@ func (c *Client) GetAPIResources(ctx context.Context, includeNamespaceScoped, in
 	return resources, nil
 }
 
-// GetResource 获取特定资源的详细信息
+// GetResource gets detailed information about a specific resource
 func (c *Client) GetResource(ctx context.Context, kind, name, namespace string) (map[string]interface{}, error) {
-	// 获取资源的 GVR
+	// Get the resource's GVR
 	gvr, err := c.findGroupVersionResource(kind)
 	if err != nil {
 		return nil, err
@@ -147,15 +147,15 @@ func (c *Client) GetResource(ctx context.Context, kind, name, namespace string) 
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("获取资源失败: %w", err)
+		return nil, fmt.Errorf("failed to get resource: %w", err)
 	}
 
 	return obj.UnstructuredContent(), nil
 }
 
-// ListResources 列出某类资源的所有实例
+// ListResources lists all instances of a resource type
 func (c *Client) ListResources(ctx context.Context, kind, namespace string, labelSelector, fieldSelector string) ([]map[string]interface{}, error) {
-	// 获取资源的 GVR
+	// Get the resource's GVR
 	gvr, err := c.findGroupVersionResource(kind)
 	if err != nil {
 		return nil, err
@@ -177,7 +177,7 @@ func (c *Client) ListResources(ctx context.Context, kind, namespace string, labe
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("列出资源失败: %w", err)
+		return nil, fmt.Errorf("failed to list resources: %w", err)
 	}
 
 	var resources []map[string]interface{}
@@ -188,14 +188,14 @@ func (c *Client) ListResources(ctx context.Context, kind, namespace string, labe
 	return resources, nil
 }
 
-// CreateResource 创建一个新的资源
+// CreateResource creates a new resource
 func (c *Client) CreateResource(ctx context.Context, kind, namespace string, manifest string) (map[string]interface{}, error) {
 	obj := &unstructured.Unstructured{}
 	if err := json.Unmarshal([]byte(manifest), &obj.Object); err != nil {
-		return nil, fmt.Errorf("解析资源清单失败: %w", err)
+		return nil, fmt.Errorf("failed to parse resource manifest: %w", err)
 	}
 
-	// 获取资源的 GVR
+	// Get the resource's GVR
 	gvr, err := c.findGroupVersionResource(kind)
 	if err != nil {
 		return nil, err
@@ -213,25 +213,25 @@ func (c *Client) CreateResource(ctx context.Context, kind, namespace string, man
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("创建资源失败: %w", err)
+		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
 
 	return result.UnstructuredContent(), nil
 }
 
-// UpdateResource 更新现有资源
+// UpdateResource updates an existing resource
 func (c *Client) UpdateResource(ctx context.Context, kind, name, namespace string, manifest string) (map[string]interface{}, error) {
 	obj := &unstructured.Unstructured{}
 	if err := json.Unmarshal([]byte(manifest), &obj.Object); err != nil {
-		return nil, fmt.Errorf("解析资源清单失败: %w", err)
+		return nil, fmt.Errorf("failed to parse resource manifest: %w", err)
 	}
 
-	// 检查名称是否匹配
+	// Check if name matches
 	if obj.GetName() != name {
-		return nil, fmt.Errorf("资源清单中的名称 (%s) 与请求的名称 (%s) 不匹配", obj.GetName(), name)
+		return nil, fmt.Errorf("name in resource manifest (%s) does not match requested name (%s)", obj.GetName(), name)
 	}
 
-	// 获取资源的 GVR
+	// Get the resource's GVR
 	gvr, err := c.findGroupVersionResource(kind)
 	if err != nil {
 		return nil, err
@@ -245,15 +245,15 @@ func (c *Client) UpdateResource(ctx context.Context, kind, name, namespace strin
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("更新资源失败: %w", err)
+		return nil, fmt.Errorf("failed to update resource: %w", err)
 	}
 
 	return result.UnstructuredContent(), nil
 }
 
-// DeleteResource 删除资源
+// DeleteResource deletes a resource
 func (c *Client) DeleteResource(ctx context.Context, kind, name, namespace string) error {
-	// 获取资源的 GVR
+	// Get the resource's GVR
 	gvr, err := c.findGroupVersionResource(kind)
 	if err != nil {
 		return err
@@ -267,24 +267,24 @@ func (c *Client) DeleteResource(ctx context.Context, kind, name, namespace strin
 	}
 
 	if deleteErr != nil {
-		return fmt.Errorf("删除资源失败: %w", deleteErr)
+		return fmt.Errorf("failed to delete resource: %w", deleteErr)
 	}
 
 	return nil
 }
 
-// findGroupVersionResource 根据 Kind 查找对应的 GroupVersionResource
+// findGroupVersionResource finds the corresponding GroupVersionResource by Kind
 func (c *Client) findGroupVersionResource(kind string) (*schema.GroupVersionResource, error) {
-	// 获取集群中所有 API Groups 和 Resources
+	// Get all API Groups and Resources in the cluster
 	resourceLists, err := c.discoveryClient.ServerPreferredResources()
 	if err != nil {
-		// 处理部分错误，有些资源可能无法访问
+		// Handle partial errors, some resources may not be accessible
 		if !discovery.IsGroupDiscoveryFailedError(err) {
-			return nil, fmt.Errorf("获取 API 资源失败: %w", err)
+			return nil, fmt.Errorf("failed to get API resources: %w", err)
 		}
 	}
 
-	// 遍历所有 API 组和资源，查找指定的 Kind
+	// Iterate through all API groups and resources to find the specified Kind
 	for _, resourceList := range resourceLists {
 		gv, err := schema.ParseGroupVersion(resourceList.GroupVersion)
 		if err != nil {
@@ -302,10 +302,10 @@ func (c *Client) findGroupVersionResource(kind string) (*schema.GroupVersionReso
 		}
 	}
 
-	return nil, fmt.Errorf("找不到资源类型 %s", kind)
+	return nil, fmt.Errorf("resource type %s not found", kind)
 }
 
-// GetKubeconfigPath 返回客户端使用的 kubeconfig 路径
+// GetKubeconfigPath returns the kubeconfig path used by the client
 func (c *Client) GetKubeconfigPath() string {
 	return c.kubeconfigPath
 }

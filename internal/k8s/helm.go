@@ -14,14 +14,14 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// HelmClient 提供 Helm 操作功能
+// HelmClient provides Helm operation functionality
 type HelmClient struct {
 	settings  *cli.EnvSettings
 	config    *action.Configuration
 	namespace string
 }
 
-// HelmRelease 表示 Helm 部署的信息
+// HelmRelease represents Helm deployment information
 type HelmRelease struct {
 	Name         string                 `json:"name"`
 	Namespace    string                 `json:"namespace"`
@@ -34,7 +34,7 @@ type HelmRelease struct {
 	Values       map[string]interface{} `json:"values,omitempty"`
 }
 
-// HelmRepository 表示一个 Helm 仓库
+// HelmRepository represents a Helm repository
 type HelmRepository struct {
 	Name     string `json:"name"`
 	URL      string `json:"url"`
@@ -42,16 +42,16 @@ type HelmRepository struct {
 	Password string `json:"password,omitempty"`
 }
 
-// NewHelmClient 创建一个 Helm 客户端
+// NewHelmClient creates a Helm client
 func NewHelmClient(namespace string, kubeconfigPath string) (*HelmClient, error) {
 	settings := cli.New()
-	
-	// 如果提供了 kubeconfig 路径，设置它
+
+	// If kubeconfig path is provided, set it
 	if kubeconfigPath != "" {
 		settings.KubeConfig = kubeconfigPath
 	}
-	
-	// 设置默认命名空间
+
+	// Set default namespace
 	if namespace != "" {
 		settings.SetNamespace(namespace)
 	} else {
@@ -62,7 +62,7 @@ func NewHelmClient(namespace string, kubeconfigPath string) (*HelmClient, error)
 	if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
 		fmt.Printf(format, v...)
 	}); err != nil {
-		return nil, fmt.Errorf("初始化 Helm 配置失败: %w", err)
+		return nil, fmt.Errorf("failed to initialize Helm config: %w", err)
 	}
 
 	return &HelmClient{
@@ -72,35 +72,35 @@ func NewHelmClient(namespace string, kubeconfigPath string) (*HelmClient, error)
 	}, nil
 }
 
-// SetNamespace 设置 Helm 客户端操作的命名空间
+// SetNamespace sets the namespace for Helm client operations
 func (c *HelmClient) SetNamespace(namespace string) error {
 	c.settings.SetNamespace(namespace)
 	c.namespace = namespace
-	
-	// 重新初始化配置
+
+	// Re-initialize config
 	if err := c.config.Init(c.settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
 		fmt.Printf(format, v...)
 	}); err != nil {
-		return fmt.Errorf("更新 Helm 配置命名空间失败: %w", err)
+		return fmt.Errorf("failed to update Helm config namespace: %w", err)
 	}
-	
+
 	return nil
 }
 
-// ListReleases 列出所有部署的 Helm charts
+// ListReleases lists all deployed Helm charts
 func (c *HelmClient) ListReleases(allNamespaces bool) ([]HelmRelease, error) {
 	client := action.NewList(c.config)
-	
-	// 是否列出所有命名空间的 releases
+
+	// Whether to list releases from all namespaces
 	if allNamespaces {
 		client.AllNamespaces = true
 	}
-	
+
 	results, err := client.Run()
 	if err != nil {
-		return nil, fmt.Errorf("列出 Helm releases 失败: %w", err)
+		return nil, fmt.Errorf("failed to list Helm releases: %w", err)
 	}
-	
+
 	releases := []HelmRelease{}
 	for _, r := range results {
 		releases = append(releases, HelmRelease{
@@ -114,26 +114,26 @@ func (c *HelmClient) ListReleases(allNamespaces bool) ([]HelmRelease, error) {
 			Updated:      r.Info.LastDeployed.Time,
 		})
 	}
-	
+
 	return releases, nil
 }
 
-// GetRelease 获取特定 Helm release 的详细信息
+// GetRelease gets detailed information about a specific Helm release
 func (c *HelmClient) GetRelease(name string) (*HelmRelease, error) {
 	client := action.NewGet(c.config)
-	
+
 	release, err := client.Run(name)
 	if err != nil {
-		return nil, fmt.Errorf("获取 Helm release 失败: %w", err)
+		return nil, fmt.Errorf("failed to get Helm release: %w", err)
 	}
-	
-	// 获取值
+
+	// Get values
 	var values map[string]interface{}
-	// 合并用户提供的值和计算的值
+	// Merge user-provided values and computed values
 	if release.Config != nil && release.Chart.Values != nil {
 		values = release.Config
 	}
-	
+
 	return &HelmRelease{
 		Name:         release.Name,
 		Namespace:    release.Namespace,
@@ -147,46 +147,46 @@ func (c *HelmClient) GetRelease(name string) (*HelmRelease, error) {
 	}, nil
 }
 
-// InstallChart 安装 Helm chart
+// InstallChart installs a Helm chart
 func (c *HelmClient) InstallChart(name, chartName string, values map[string]interface{}, version string, repo string) (*HelmRelease, error) {
 	client := action.NewInstall(c.config)
 	client.ReleaseName = name
 	client.Namespace = c.namespace
-	
-	// 如果指定了版本，设置版本
+
+	// If version is specified, set it
 	if version != "" {
 		client.Version = version
 	}
-	
-	// 解析 chart 名称和仓库
+
+	// Parse chart name and repository
 	var chartPath string
 	if repo != "" {
-		// 使用指定的仓库
+		// Use specified repository
 		chartPath = fmt.Sprintf("%s/%s", repo, chartName)
 	} else {
-		// 默认使用本地或远程 chart
+		// Default to local or remote chart
 		chartPath = chartName
 	}
-	
-	// 定位 chart
+
+	// Locate chart
 	chartPathOptions := client.ChartPathOptions
 	cp, err := chartPathOptions.LocateChart(chartPath, c.settings)
 	if err != nil {
-		return nil, fmt.Errorf("查找 chart '%s' 失败: %w", chartPath, err)
+		return nil, fmt.Errorf("failed to locate chart '%s': %w", chartPath, err)
 	}
-	
-	// 加载 chart
+
+	// Load chart
 	chartRequested, err := loader.Load(cp)
 	if err != nil {
-		return nil, fmt.Errorf("加载 chart 失败: %w", err)
+		return nil, fmt.Errorf("failed to load chart: %w", err)
 	}
-	
-	// 安装 chart
+
+	// Install chart
 	release, err := client.Run(chartRequested, values)
 	if err != nil {
-		return nil, fmt.Errorf("安装 chart 失败: %w", err)
+		return nil, fmt.Errorf("failed to install chart: %w", err)
 	}
-	
+
 	return &HelmRelease{
 		Name:         release.Name,
 		Namespace:    release.Namespace,
@@ -200,44 +200,44 @@ func (c *HelmClient) InstallChart(name, chartName string, values map[string]inte
 	}, nil
 }
 
-// UpgradeChart 升级 Helm chart
+// UpgradeChart upgrades a Helm chart
 func (c *HelmClient) UpgradeChart(name, chartName string, values map[string]interface{}, version string, repo string) (*HelmRelease, error) {
 	client := action.NewUpgrade(c.config)
-	
-	// 如果指定了版本，设置版本
+
+	// If version is specified, set it
 	if version != "" {
 		client.Version = version
 	}
-	
-	// 解析 chart 名称和仓库
+
+	// Parse chart name and repository
 	var chartPath string
 	if repo != "" {
-		// 使用指定的仓库
+		// Use specified repository
 		chartPath = fmt.Sprintf("%s/%s", repo, chartName)
 	} else {
-		// 默认使用本地或远程 chart
+		// Default to local or remote chart
 		chartPath = chartName
 	}
-	
-	// 定位 chart
+
+	// Locate chart
 	chartPathOptions := client.ChartPathOptions
 	cp, err := chartPathOptions.LocateChart(chartPath, c.settings)
 	if err != nil {
-		return nil, fmt.Errorf("查找 chart '%s' 失败: %w", chartPath, err)
+		return nil, fmt.Errorf("failed to locate chart '%s': %w", chartPath, err)
 	}
-	
-	// 加载 chart
+
+	// Load chart
 	chartRequested, err := loader.Load(cp)
 	if err != nil {
-		return nil, fmt.Errorf("加载 chart 失败: %w", err)
+		return nil, fmt.Errorf("failed to load chart: %w", err)
 	}
-	
-	// 升级 chart
+
+	// Upgrade chart
 	release, err := client.Run(name, chartRequested, values)
 	if err != nil {
-		return nil, fmt.Errorf("升级 chart 失败: %w", err)
+		return nil, fmt.Errorf("failed to upgrade chart: %w", err)
 	}
-	
+
 	return &HelmRelease{
 		Name:         release.Name,
 		Namespace:    release.Namespace,
@@ -251,35 +251,35 @@ func (c *HelmClient) UpgradeChart(name, chartName string, values map[string]inte
 	}, nil
 }
 
-// UninstallChart 卸载 Helm chart
+// UninstallChart uninstalls a Helm chart
 func (c *HelmClient) UninstallChart(name string) error {
 	client := action.NewUninstall(c.config)
-	
+
 	_, err := client.Run(name)
 	if err != nil {
-		return fmt.Errorf("卸载 chart 失败: %w", err)
+		return fmt.Errorf("failed to uninstall chart: %w", err)
 	}
-	
+
 	return nil
 }
 
-// RollbackRelease 回滚 Helm release 到指定版本
+// RollbackRelease rolls back a Helm release to a specified revision
 func (c *HelmClient) RollbackRelease(name string, revision int) error {
 	client := action.NewRollback(c.config)
 	client.Version = revision
-	
+
 	return client.Run(name)
 }
 
-// GetReleaseHistory 获取 Helm release 的历史记录
+// GetReleaseHistory gets the history of a Helm release
 func (c *HelmClient) GetReleaseHistory(name string) ([]HelmRelease, error) {
 	client := action.NewHistory(c.config)
-	
+
 	hist, err := client.Run(name)
 	if err != nil {
-		return nil, fmt.Errorf("获取 release 历史记录失败: %w", err)
+		return nil, fmt.Errorf("failed to get release history: %w", err)
 	}
-	
+
 	releases := []HelmRelease{}
 	for _, r := range hist {
 		releases = append(releases, HelmRelease{
@@ -293,98 +293,98 @@ func (c *HelmClient) GetReleaseHistory(name string) ([]HelmRelease, error) {
 			Updated:      r.Info.LastDeployed.Time,
 		})
 	}
-	
+
 	return releases, nil
 }
 
-// AddRepository 添加 Helm 仓库
+// AddRepository adds a Helm repository
 func (c *HelmClient) AddRepository(repository *HelmRepository) error {
-	// 创建存储库条目
+	// Create repository entry
 	entry := &repo.Entry{
 		Name:     repository.Name,
 		URL:      repository.URL,
 		Username: repository.Username,
 		Password: repository.Password,
 	}
-	
-	// 获取存储库文件路径
+
+	// Get repository file path
 	repoFile := c.settings.RepositoryConfig
-	
-	// 确保存储库目录存在
+
+	// Ensure repository directory exists
 	err := os.MkdirAll(filepath.Dir(repoFile), os.ModePerm)
 	if err != nil && !os.IsExist(err) {
-		return fmt.Errorf("创建 repository 配置目录失败: %w", err)
+		return fmt.Errorf("failed to create repository config directory: %w", err)
 	}
-	
-	// 加载存储库文件
+
+	// Load repository file
 	f, err := repo.LoadFile(repoFile)
 	if err != nil {
-		// 如果文件不存在，创建一个新的文件
+		// If file doesn't exist, create a new file
 		if os.IsNotExist(err) {
 			f = repo.NewFile()
 		} else {
 			return err
 		}
 	}
-	
-	// 检查是否已存在同名存储库
+
+	// Check if repository with same name already exists
 	if f.Has(entry.Name) {
-		// 更新存在的条目
+		// Update existing entry
 		f.Update(entry)
 	} else {
-		// 添加新条目
+		// Add new entry
 		f.Add(entry)
 	}
-	
-	// 保存存储库文件
+
+	// Save repository file
 	if err := f.WriteFile(repoFile, 0644); err != nil {
-		return fmt.Errorf("保存 repository 配置失败: %w", err)
+		return fmt.Errorf("failed to save repository config: %w", err)
 	}
-	
+
 	return nil
 }
 
-// RemoveRepository 移除 Helm 仓库
+// RemoveRepository removes a Helm repository
 func (c *HelmClient) RemoveRepository(name string) error {
-	// 获取存储库文件路径
+	// Get repository file path
 	repoFile := c.settings.RepositoryConfig
-	
-	// 加载存储库文件
+
+	// Load repository file
 	f, err := repo.LoadFile(repoFile)
 	if err != nil {
-		return fmt.Errorf("加载 repository 配置失败: %w", err)
+		return fmt.Errorf("failed to load repository config: %w", err)
 	}
-	
-	// 检查是否存在该存储库
+
+	// Check if repository exists
 	if !f.Has(name) {
-		return fmt.Errorf("repository %s 不存在", name)
+		return fmt.Errorf("repository %s does not exist", name)
 	}
-	
-	// 移除存储库
+
+	// Remove repository
 	f.Remove(name)
-	
-	// 保存存储库文件
+
+	// Save repository file
 	if err := f.WriteFile(repoFile, 0644); err != nil {
-		return fmt.Errorf("保存 repository 配置失败: %w", err)
+		return fmt.Errorf("failed to save repository config: %w", err)
 	}
-	
+
 	return nil
 }
 
-// ListRepositories 列出所有 Helm 仓库
+// ListRepositories lists all Helm repositories
 func (c *HelmClient) ListRepositories() ([]*HelmRepository, error) {
-	// 获取存储库文件路径
+	// Get repository file path
 	repoFile := c.settings.RepositoryConfig
-	
-	// 加载存储库文件
+
+	// Load repository file
 	f, err := repo.LoadFile(repoFile)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return []*HelmRepository{}, nil
 		}
-		return nil, fmt.Errorf("加载 repository 配置失败: %w", err)
+		return nil, fmt.Errorf("failed to load repository config: %w", err)
 	}
-	
+
 	repos := []*HelmRepository{}
 	for _, entry := range f.Repositories {
 		repos = append(repos, &HelmRepository{
@@ -392,59 +392,59 @@ func (c *HelmClient) ListRepositories() ([]*HelmRepository, error) {
 			URL:  entry.URL,
 		})
 	}
-	
+
 	return repos, nil
 }
 
-// ParseYamlValues 解析 YAML 格式的值为 map
+// ParseYamlValues parses YAML format values into a map
 func ParseYamlValues(valuesYaml string) (map[string]interface{}, error) {
 	if valuesYaml == "" {
 		return map[string]interface{}{}, nil
 	}
-	
+
 	values := map[string]interface{}{}
 	err := yaml.Unmarshal([]byte(valuesYaml), &values)
 	if err != nil {
-		return nil, fmt.Errorf("解析 YAML 值失败: %w", err)
+		return nil, fmt.Errorf("failed to parse YAML values: %w", err)
 	}
-	
+
 	return values, nil
 }
 
-// GetChartInfo 获取 chart 的详细信息
+// GetChartInfo gets detailed information about a chart
 func (c *HelmClient) GetChartInfo(name string, version string, repo string) (*chart.Metadata, error) {
 	client := action.NewShowWithConfig(action.ShowChart, c.config)
 	chartPathOptions := client.ChartPathOptions
 	chartPathOptions.Version = version
-	
-	// 解析 chart 名称和仓库
+
+	// Parse chart name and repository
 	var chartPath string
 	if repo != "" {
-		// 使用指定的仓库
+		// Use specified repository
 		chartPath = fmt.Sprintf("%s/%s", repo, name)
 	} else {
-		// 默认使用本地或远程 chart
+		// Default to local or remote chart
 		chartPath = name
 	}
-	
-	// 定位 chart
+
+	// Locate chart
 	cp, err := chartPathOptions.LocateChart(chartPath, c.settings)
 	if err != nil {
-		return nil, fmt.Errorf("查找 chart '%s' 失败: %w", chartPath, err)
+		return nil, fmt.Errorf("failed to locate chart '%s': %w", chartPath, err)
 	}
-	
-	// 加载 chart
+
+	// Load chart
 	chartRequested, err := loader.Load(cp)
 	if err != nil {
-		return nil, fmt.Errorf("加载 chart 失败: %w", err)
+		return nil, fmt.Errorf("failed to load chart: %w", err)
 	}
-	
+
 	return chartRequested.Metadata, nil
 }
 
-// SearchCharts 搜索 Helm 仓库中的 charts
+// SearchCharts searches for charts in Helm repositories
 func (c *HelmClient) SearchCharts(keyword string, repoName string) ([]*HelmRepository, error) {
-	// 这里需要实现搜索逻辑
-	// 由于 Helm v3 API 中搜索有些复杂，暂时只返回所有仓库列表
+	// Search logic needs to be implemented here
+	// Since search in Helm v3 API is complex, temporarily return all repository list
 	return c.ListRepositories()
-} 
+}
