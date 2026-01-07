@@ -117,6 +117,11 @@ func runServer(cmd *cobra.Command, args []string) {
 		s.AddTool(tools.CreateListResourcesTool(), tools.HandleListResources(client))
 	}
 
+	// Add operational tools (always enabled for read operations)
+	fmt.Println("Registering operational tools...")
+	s.AddTool(tools.CreateGetPodLogsTool(), tools.HandleGetPodLogs(client))
+	s.AddTool(tools.CreateListEventsTool(), tools.HandleListEvents(client))
+
 	// Add write operation tools (if enabled)
 	if cfg.EnableCreate {
 		fmt.Println("Registering resource creation tool...")

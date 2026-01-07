@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"path/filepath"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -15,6 +17,13 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+)
+
+const (
+	// DefaultNamespace is the default Kubernetes namespace
+	DefaultNamespace = "default"
+	// DefaultPodLogTailLines is the default number of lines to retrieve from pod logs
+	DefaultPodLogTailLines = 50
 )
 
 // Client wraps Kubernetes client functionality
@@ -308,4 +317,98 @@ func (c *Client) findGroupVersionResource(kind string) (*schema.GroupVersionReso
 // GetKubeconfigPath returns the kubeconfig path used by the client
 func (c *Client) GetKubeconfigPath() string {
 	return c.kubeconfigPath
+}
+
+// GetPodLogs retrieves logs from a specific pod
+func (c *Client) GetPodLogs(ctx context.Context, namespace, podName, container string, tailLines int) (string, error) {
+	if namespace == "" {
+		namespace = DefaultNamespace
+	}
+
+	opts := &corev1.PodLogOptions{
+		TailLines: int64Ptr(int64(tailLines)),
+	}
+	if container != "" {
+		opts.Container = container
+	}
+
+	req := c.clientset.CoreV1().Pods(namespace).GetLogs(podName, opts)
+	stream, err := req.Stream(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get pod logs: %w", err)
+	}
+	defer stream.Close()
+
+	logs, err := io.ReadAll(stream)
+	if err != nil {
+		return "", fmt.Errorf("failed to read logs: %w", err)
+	}
+
+	return string(logs), nil
+}
+
+// ListEvents lists events within a namespace or for a specific resource
+func (c *Client) ListEvents(ctx context.Context, namespace, kind, name, fieldSelector string) ([]map[string]interface{}, error) {
+	opts := metav1.ListOptions{}
+	if fieldSelector != "" {
+		opts.FieldSelector = fieldSelector
+	}
+
+	// If kind and name are specified, add field selector for the involved object
+	if kind != "" && name != "" {
+		fieldSelectorValue := fmt.Sprintf("involvedObject.kind=%s,involvedObject.name=%s", kind, name)
+		if opts.FieldSelector != "" {
+			opts.FieldSelector = opts.FieldSelector + "," + fieldSelectorValue
+		} else {
+			opts.FieldSelector = fieldSelectorValue
+		}
+	}
+
+	var events *corev1.EventList
+	var err error
+
+	if namespace != "" {
+		events, err = c.clientset.CoreV1().Events(namespace).List(ctx, opts)
+	} else {
+		// List events from all namespaces
+		events, err = c.clientset.CoreV1().Events("").List(ctx, opts)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to list events: %w", err)
+	}
+
+	result := make([]map[string]interface{}, 0, len(events.Items))
+	for _, event := range events.Items {
+		result = append(result, map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"name":              event.Name,
+				"namespace":         event.Namespace,
+				"creationTimestamp": event.CreationTimestamp,
+			},
+			"involvedObject": map[string]interface{}{
+				"kind":      event.InvolvedObject.Kind,
+				"name":      event.InvolvedObject.Name,
+				"namespace": event.InvolvedObject.Namespace,
+				"uid":       event.InvolvedObject.UID,
+			},
+			"reason":         event.Reason,
+			"message":        event.Message,
+			"type":           event.Type,
+			"firstTimestamp": event.FirstTimestamp,
+			"lastTimestamp":  event.LastTimestamp,
+			"count":          event.Count,
+			"source": map[string]interface{}{
+				"component": event.Source.Component,
+				"host":      event.Source.Host,
+			},
+		})
+	}
+
+	return result, nil
+}
+
+// int64Ptr returns a pointer to an int64
+func int64Ptr(i int64) *int64 {
+	return &i
 }
