@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"path/filepath"
 
 	corev1 "k8s.io/api/core/v1"
@@ -333,7 +334,12 @@ func (c *Client) GetPodLogs(ctx context.Context, namespace, podName, container s
 	if err != nil {
 		return "", fmt.Errorf("failed to get pod logs: %w", err)
 	}
-	defer stream.Close()
+	defer func(stream io.ReadCloser) {
+		err := stream.Close()
+		if err != nil {
+			log.Printf("failed to close pod logs stream: %v", err)
+		}
+	}(stream)
 
 	logs, err := io.ReadAll(stream)
 	if err != nil {
