@@ -300,7 +300,7 @@ func CreateGetPodLogsTool() mcp.Tool {
 			mcp.Description(fmt.Sprintf("Namespace (default: %s)", k8s.DefaultNamespace)),
 		),
 		mcp.WithString("container",
-			mcp.Description("Container name (optional, gets all containers if not specified)"),
+			mcp.Description("Container name (optional, defaults to first container in multi-container pods)"),
 		),
 		mcp.WithString("tail_lines",
 			mcp.Description(fmt.Sprintf("Number of lines to retrieve from the end of logs (optional, default: %d)", k8s.DefaultPodLogTailLines)),
