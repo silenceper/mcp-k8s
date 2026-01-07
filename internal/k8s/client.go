@@ -321,10 +321,6 @@ func (c *Client) GetKubeconfigPath() string {
 
 // GetPodLogs retrieves logs from a specific pod
 func (c *Client) GetPodLogs(ctx context.Context, namespace, podName, container string, tailLines int) (string, error) {
-	if namespace == "" {
-		namespace = DefaultNamespace
-	}
-
 	opts := &corev1.PodLogOptions{
 		TailLines: int64Ptr(int64(tailLines)),
 	}
