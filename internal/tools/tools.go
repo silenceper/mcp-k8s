@@ -321,12 +321,10 @@ func HandleGetPodLogs(client *k8s.Client) func(ctx context.Context, request mcp.
 
 		// Parse tail_lines as string and convert to int
 		tailLinesStr := request.GetString("tail_lines", DefaultPodLogTailLinesStr)
-		tailLines := k8s.DefaultPodLogTailLines
-		parsed, err := strconv.Atoi(tailLinesStr)
+		tailLines, err := strconv.Atoi(tailLinesStr)
 		if err != nil {
 			return nil, fmt.Errorf("invalid tail_lines value: %s, must be a number", tailLinesStr)
 		}
-		tailLines = parsed
 		logs, err := client.GetPodLogs(ctx, namespace, podName, container, tailLines)
 		if err != nil {
 			return nil, err
