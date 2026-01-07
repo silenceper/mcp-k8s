@@ -4,9 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/silenceper/mcp-k8s/internal/k8s"
+)
+
+const (
+	// DefaultPodLogTailLinesStr is the default number of lines to retrieve from pod logs as string
+	DefaultPodLogTailLinesStr = "50"
 )
 
 // CreateGetAPIResourcesTool creates a tool for getting API resources
@@ -279,5 +285,92 @@ func HandleDeleteResource(client *k8s.Client) func(ctx context.Context, request 
 		}
 
 		return mcp.NewToolResultText(fmt.Sprintf("Successfully deleted resource %s/%s", kind, name)), nil
+	}
+}
+
+// CreateGetPodLogsTool creates a tool for getting pod logs
+func CreateGetPodLogsTool() mcp.Tool {
+	return mcp.NewTool("get_pod_logs",
+		mcp.WithDescription("Retrieve logs from a specific pod"),
+		mcp.WithString("pod_name",
+			mcp.Required(),
+			mcp.Description("Pod name"),
+		),
+		mcp.WithString("namespace",
+			mcp.Description(fmt.Sprintf("Namespace (default: %s)", k8s.DefaultNamespace)),
+		),
+		mcp.WithString("container",
+			mcp.Description("Container name (optional, defaults to first container in multi-container pods)"),
+		),
+		mcp.WithString("tail_lines",
+			mcp.Description(fmt.Sprintf("Number of lines to retrieve from the end of logs (optional, default: %d)", k8s.DefaultPodLogTailLines)),
+		),
+	)
+}
+
+// HandleGetPodLogs handles the get pod logs tool
+func HandleGetPodLogs(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		podName, err := request.RequireString("pod_name")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter: pod_name: %w", err)
+		}
+
+		namespace := request.GetString("namespace", k8s.DefaultNamespace)
+		container := request.GetString("container", "")
+
+		// Parse tail_lines as string and convert to int
+		tailLinesStr := request.GetString("tail_lines", DefaultPodLogTailLinesStr)
+		tailLines, err := strconv.Atoi(tailLinesStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid tail_lines value: %s, must be a number", tailLinesStr)
+		}
+		logs, err := client.GetPodLogs(ctx, namespace, podName, container, tailLines)
+		if err != nil {
+			return nil, err
+		}
+
+		return mcp.NewToolResultText(logs), nil
+	}
+}
+
+// CreateListEventsTool creates a tool for listing events
+func CreateListEventsTool() mcp.Tool {
+	return mcp.NewTool("list_events",
+		mcp.WithDescription("List events within a namespace or for a specific resource"),
+		mcp.WithString("namespace",
+			mcp.Description("Namespace to list events from (if not specified, lists from all namespaces)"),
+		),
+		mcp.WithString("kind",
+			mcp.Description("Resource kind to filter events (e.g., Pod, Deployment)"),
+		),
+		mcp.WithString("name",
+			mcp.Description("Resource name to filter events"),
+		),
+		mcp.WithString("field_selector",
+			mcp.Description("Field selector to filter events (format: key1=value1,key2=value2)"),
+		),
+	)
+}
+
+// HandleListEvents handles the list events tool
+func HandleListEvents(client *k8s.Client) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		namespace := request.GetString("namespace", "")
+		kind := request.GetString("kind", "")
+		name := request.GetString("name", "")
+		fieldSelector := request.GetString("field_selector", "")
+
+		events, err := client.ListEvents(ctx, namespace, kind, name, fieldSelector)
+		if err != nil {
+			return nil, err
+		}
+
+		jsonResponse, err := json.Marshal(events)
+		if err != nil {
+			return nil, fmt.Errorf("failed to serialize response: %w", err)
+		}
+
+		return mcp.NewToolResultText(string(jsonResponse)), nil
 	}
 }

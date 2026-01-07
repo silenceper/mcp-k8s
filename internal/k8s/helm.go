@@ -55,7 +55,7 @@ func NewHelmClient(namespace string, kubeconfigPath string) (*HelmClient, error)
 	if namespace != "" {
 		settings.SetNamespace(namespace)
 	} else {
-		settings.SetNamespace("default")
+		settings.SetNamespace(DefaultNamespace)
 	}
 
 	actionConfig := new(action.Configuration)
