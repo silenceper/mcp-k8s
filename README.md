@@ -9,6 +9,10 @@
 
 A Kubernetes MCP (Model Control Protocol) server that enables interaction with Kubernetes clusters through MCP tools.
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/silenceper-mcp-k8s).
+
 ## Features
 
 - Query supported Kubernetes resource types (built-in resources and CRDs)
