@@ -99,6 +99,9 @@ An stdio-based MCP server that connects to Kubernetes clusters and provides the 
 - `add_helm_repository`: Add a new Helm repository (can be disabled)
 - `remove_helm_repository`: Remove a Helm repository (can be disabled)
 
+#### Tool Annotations
+Every tool declares MCP [tool annotations](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#tool-annotations) (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) in its `tools/list` entry. Clients and policy layers such as approval prompts or command guards can use them to require review before running destructive tools like `delete_resource`, `update_resource`, `upgrade_helm_chart`, `uninstall_helm_chart` and `remove_helm_repo`.
+
 ## Usage
 
 mcp-k8s supports three communication modes:

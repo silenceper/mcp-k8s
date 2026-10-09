@@ -13,6 +13,10 @@ import (
 func CreateListHelmReleasesTool() mcp.Tool {
 	return mcp.NewTool("list_helm_releases",
 		mcp.WithDescription("List all installed Helm charts"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithBoolean("all_namespaces",
 			mcp.Description("Whether to list releases from all namespaces"),
 			mcp.DefaultBool(false),
@@ -24,6 +28,10 @@ func CreateListHelmReleasesTool() mcp.Tool {
 func CreateGetHelmReleaseTool() mcp.Tool {
 	return mcp.NewTool("get_helm_release",
 		mcp.WithDescription("Get detailed information about a specific Helm release"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithString("name",
 			mcp.Required(),
 			mcp.Description("Name of the release"),
@@ -35,6 +43,10 @@ func CreateGetHelmReleaseTool() mcp.Tool {
 func CreateInstallHelmChartTool() mcp.Tool {
 	return mcp.NewTool("install_helm_chart",
 		mcp.WithDescription("Install a Helm chart"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithString("name",
 			mcp.Required(),
 			mcp.Description("Name of the release to install"),
@@ -62,6 +74,10 @@ func CreateInstallHelmChartTool() mcp.Tool {
 func CreateUpgradeHelmChartTool() mcp.Tool {
 	return mcp.NewTool("upgrade_helm_chart",
 		mcp.WithDescription("Upgrade a Helm chart"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(false),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithString("name",
 			mcp.Required(),
 			mcp.Description("Name of the release to upgrade"),
@@ -89,6 +105,10 @@ func CreateUpgradeHelmChartTool() mcp.Tool {
 func CreateUninstallHelmChartTool() mcp.Tool {
 	return mcp.NewTool("uninstall_helm_chart",
 		mcp.WithDescription("Uninstall a Helm chart"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithString("name",
 			mcp.Required(),
 			mcp.Description("Name of the release to uninstall"),
@@ -103,6 +123,10 @@ func CreateUninstallHelmChartTool() mcp.Tool {
 func CreateListHelmRepositoriesTool() mcp.Tool {
 	return mcp.NewTool("list_helm_repos",
 		mcp.WithDescription("List all configured Helm repositories"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
 	)
 }
 
@@ -110,6 +134,10 @@ func CreateListHelmRepositoriesTool() mcp.Tool {
 func CreateAddHelmRepositoryTool() mcp.Tool {
 	return mcp.NewTool("add_helm_repo",
 		mcp.WithDescription("Add a Helm repository"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
+		mcp.WithIdempotentHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithString("name",
 			mcp.Required(),
 			mcp.Description("Repository name"),
@@ -131,6 +159,10 @@ func CreateAddHelmRepositoryTool() mcp.Tool {
 func CreateRemoveHelmRepositoryTool() mcp.Tool {
 	return mcp.NewTool("remove_helm_repo",
 		mcp.WithDescription("Remove a Helm repository"),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
+		mcp.WithOpenWorldHintAnnotation(true),
 		mcp.WithString("name",
 			mcp.Required(),
 			mcp.Description("Repository name"),
